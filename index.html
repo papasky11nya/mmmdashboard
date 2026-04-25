@@ -3,379 +3,219 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MMM Dashboard — Media Mix Modelling</title>
+<title>MMM Dashboard v2 — Media Mix Modelling</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-primary:#ffffff; --bg-secondary:#f9f9f7; --bg-tertiary:#f2f1ed;
+  --text-primary:#1a1a18; --text-secondary:#6b6b67;
+  --border:rgba(0,0,0,0.12); --border-md:rgba(0,0,0,0.22);
+  --radius-md:8px; --radius-lg:12px;
+  --accent:#E24B4A;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg-primary:#1e1e1c; --bg-secondary:#252523; --bg-tertiary:#141412;
+    --text-primary:#f0efe9; --text-secondary:#9a9994;
+    --border:rgba(255,255,255,0.10); --border-md:rgba(255,255,255,0.20);
+  }
+}
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; background:var(--bg-tertiary); color:var(--text-primary); font-size:14px; min-height:100vh; }
 
-  :root {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f9f9f7;
-    --bg-tertiary: #f2f1ed;
-    --text-primary: #1a1a18;
-    --text-secondary: #6b6b67;
-    --border: rgba(0,0,0,0.12);
-    --border-md: rgba(0,0,0,0.22);
-    --radius-md: 8px;
-    --radius-lg: 12px;
-  }
+/* HEADER */
+.header { background:var(--bg-primary); border-bottom:0.5px solid var(--border); padding:14px 24px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:200; }
+.header-logo { display:flex; align-items:center; gap:10px; }
+.header-dot { width:30px; height:30px; border-radius:8px; background:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:#fff; }
+.header-title { font-size:15px; font-weight:600; }
+.header-sub { font-size:11px; color:var(--text-secondary); margin-top:1px; }
+.header-right { display:flex; align-items:center; gap:10px; }
+.header-campaign { font-size:12px; color:var(--text-secondary); }
+.btn-save { padding:7px 14px; background:var(--accent); color:#fff; border:none; border-radius:var(--radius-md); font-size:12px; font-weight:600; cursor:pointer; }
+.btn-save:hover { opacity:.85; }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg-primary: #1e1e1c;
-      --bg-secondary: #252523;
-      --bg-tertiary: #141412;
-      --text-primary: #f0efe9;
-      --text-secondary: #9a9994;
-      --border: rgba(255,255,255,0.10);
-      --border-md: rgba(255,255,255,0.20);
-    }
-  }
+/* MAIN NAV */
+.main-nav { background:var(--bg-primary); border-bottom:0.5px solid var(--border); padding:0 24px; display:flex; gap:0; overflow-x:auto; }
+.main-nav-btn { padding:12px 16px; border:none; background:transparent; color:var(--text-secondary); font-size:13px; font-weight:500; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; transition:all .15s; }
+.main-nav-btn.active { color:var(--text-primary); border-bottom-color:var(--accent); }
+.main-nav-btn:hover:not(.active) { color:var(--text-primary); }
 
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    font-size: 14px;
-    min-height: 100vh;
-  }
+/* LAYOUT */
+.app { max-width:1150px; margin:0 auto; padding:20px 24px; }
+.panel { display:none; }
+.panel.active { display:block; }
 
-  /* ── HEADER ── */
-  .header {
-    background: var(--bg-primary);
-    border-bottom: 0.5px solid var(--border);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .header-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .header-dot {
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    background: #E24B4A;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 13px; color: #fff;
-  }
-  .header-title { font-size: 15px; font-weight: 600; }
-  .header-sub { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
-  .header-meta { font-size: 11px; color: var(--text-secondary); }
+/* CARDS */
+.card { background:var(--bg-primary); border-radius:var(--radius-lg); border:0.5px solid var(--border); padding:18px; margin-bottom:14px; }
+.card-title { font-size:10px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.07em; margin-bottom:14px; }
 
-  /* ── MAIN NAV ── */
-  .main-nav {
-    background: var(--bg-primary);
-    border-bottom: 0.5px solid var(--border);
-    padding: 0 24px;
-    display: flex;
-    gap: 0;
-    overflow-x: auto;
-  }
-  .main-nav-btn {
-    padding: 12px 18px;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all .15s;
-    white-space: nowrap;
-  }
-  .main-nav-btn.active {
-    color: var(--text-primary);
-    border-bottom-color: #E24B4A;
-  }
-  .main-nav-btn:hover:not(.active) { color: var(--text-primary); }
+/* KPI */
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:14px; }
+.kpi { background:var(--bg-secondary); border-radius:var(--radius-md); padding:14px; }
+.kpi-label { font-size:11px; color:var(--text-secondary); margin-bottom:6px; }
+.kpi-value { font-size:22px; font-weight:600; line-height:1; }
+.kpi-sub { font-size:11px; color:var(--text-secondary); margin-top:4px; }
 
-  /* ── LAYOUT ── */
-  .app { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
-  .panel { display: none; }
-  .panel.active { display: block; }
+/* CHARTS */
+.charts-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.chart-wrap { position:relative; }
 
-  /* ── SECTION NAV (sub-tabs) ── */
-  .sub-nav {
-    display: flex;
-    gap: 4px;
-    padding: 4px;
-    background: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    border: 0.5px solid var(--border);
-    margin-bottom: 16px;
-  }
-  .sub-nav-btn {
-    flex: 1;
-    padding: 8px 6px;
-    border: none;
-    background: transparent;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    transition: all .15s;
-    white-space: nowrap;
-  }
-  .sub-nav-btn.active {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-  }
+/* BADGES */
+.badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:600; }
+.badge-scale    { background:#EAF3DE; color:#27500A; }
+.badge-maintain { background:#FAEEDA; color:#633806; }
+.badge-optimize { background:#E6F1FB; color:#0C447C; }
+.badge-reduce   { background:#FCEBEB; color:#791F1F; }
+.badge-test     { background:#EEEDFE; color:#3C3489; }
+.badge-green    { background:#EAF3DE; color:#27500A; }
+.badge-amber    { background:#FAEEDA; color:#633806; }
+.badge-red      { background:#FCEBEB; color:#791F1F; }
 
-  /* ── CARDS ── */
-  .card {
-    background: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    border: 0.5px solid var(--border);
-    padding: 18px;
-    margin-bottom: 14px;
-  }
-  .card-title {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: .07em;
-    margin-bottom: 14px;
-  }
+/* SCORE BARS */
+.score-row { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+.score-name { width:120px; font-size:12px; flex-shrink:0; }
+.score-track { flex:1; height:6px; background:var(--border); border-radius:3px; }
+.score-bar { height:6px; border-radius:3px; transition:width .3s; }
+.score-val { width:32px; text-align:right; font-size:12px; font-weight:600; }
 
-  /* ── KPI CARDS ── */
-  .kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-  .kpi {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-md);
-    padding: 14px;
-  }
-  .kpi-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 6px; }
-  .kpi-value { font-size: 22px; font-weight: 600; line-height: 1; }
-  .kpi-sub { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+/* INSIGHT */
+.insight-item { padding:12px 14px; border-radius:var(--radius-md); border-left:3px solid; margin-bottom:10px; font-size:12px; line-height:1.7; }
+.ins-scale  { background:#EAF3DE; border-color:#639922; color:#1a2e0a; }
+.ins-warn   { background:#FAEEDA; border-color:#BA7517; color:#2e1e0a; }
+.ins-reduce { background:#FCEBEB; border-color:#E24B4A; color:#2e0a0a; }
+.ins-info   { background:#E6F1FB; border-color:#378ADD; color:#0a1e2e; }
 
-  /* ── CHARTS ── */
-  .charts-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-bottom: 14px;
-  }
-  .chart-wrap { position: relative; }
+/* OPTIMIZER */
+.opt-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; margin-bottom:14px; }
+.opt-channel { background:var(--bg-secondary); border-radius:var(--radius-md); padding:14px; }
+.opt-name { font-size:12px; font-weight:600; margin-bottom:6px; }
+.opt-curr { font-size:11px; color:var(--text-secondary); margin-bottom:2px; }
+.opt-rec  { font-size:18px; font-weight:600; }
+.opt-delta { font-size:11px; margin-top:3px; }
+.delta-up { color:#3B6D11; } .delta-down { color:#A32D2D; } .delta-same { color:var(--text-secondary); }
+.bar-track { height:4px; background:var(--border); border-radius:2px; margin-top:10px; }
+.bar-fill  { height:4px; border-radius:2px; }
 
-  /* ── TABLES ── */
-  .tbl-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  th {
-    text-align: left;
-    padding: 9px 12px;
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    border-bottom: 0.5px solid var(--border);
-    white-space: nowrap;
-    background: var(--bg-secondary);
-  }
-  td {
-    padding: 10px 12px;
-    border-bottom: 0.5px solid var(--border);
-    white-space: nowrap;
-  }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--bg-secondary); }
+/* SCENARIO */
+.s-tabs { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+.s-tab { padding:7px 16px; border-radius:20px; border:0.5px solid var(--border-md); background:transparent; cursor:pointer; font-size:12px; font-weight:500; color:var(--text-secondary); }
+.s-tab.active { background:var(--text-primary); color:var(--bg-primary); border-color:var(--text-primary); }
+.proj-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px; }
+.proj-card { background:var(--bg-secondary); border-radius:var(--radius-md); padding:14px; text-align:center; }
+.proj-label { font-size:10px; color:var(--text-secondary); margin-bottom:5px; }
+.proj-val   { font-size:20px; font-weight:600; }
+.proj-delta { font-size:11px; margin-top:3px; }
+.bw-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
 
-  /* ── BADGES ── */
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 600;
-  }
-  .badge-scale    { background: #EAF3DE; color: #27500A; }
-  .badge-maintain { background: #FAEEDA; color: #633806; }
-  .badge-optimize { background: #E6F1FB; color: #0C447C; }
-  .badge-reduce   { background: #FCEBEB; color: #791F1F; }
-  .badge-test     { background: #EEEDFE; color: #3C3489; }
-  .badge-green    { background: #EAF3DE; color: #27500A; }
-  .badge-amber    { background: #FAEEDA; color: #633806; }
-  .badge-red      { background: #FCEBEB; color: #791F1F; }
+/* ADSTOCK / SAT */
+.ctrl-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap; }
+.ctrl-row label { font-size:11px; color:var(--text-secondary); min-width:130px; }
+.ctrl-row input[type=range] { flex:1; min-width:120px; accent-color:#378ADD; }
+.ctrl-row span { font-size:13px; font-weight:600; min-width:50px; text-align:right; }
+.ch-tabs { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:14px; }
+.ch-tab { padding:5px 12px; border-radius:20px; border:0.5px solid var(--border-md); background:transparent; cursor:pointer; font-size:11px; color:var(--text-secondary); font-weight:500; }
+.ch-tab.active { background:var(--text-primary); color:var(--bg-primary); border-color:var(--text-primary); }
 
-  /* ── INSIGHT ITEMS ── */
-  .insight-item {
-    padding: 12px 14px;
-    border-radius: var(--radius-md);
-    border-left: 3px solid;
-    margin-bottom: 10px;
-    font-size: 12px;
-    line-height: 1.7;
-  }
-  .ins-scale  { background: #EAF3DE; border-color: #639922; color: #1a2e0a; }
-  .ins-warn   { background: #FAEEDA; border-color: #BA7517; color: #2e1e0a; }
-  .ins-reduce { background: #FCEBEB; border-color: #E24B4A; color: #2e0a0a; }
-  .ins-info   { background: #E6F1FB; border-color: #378ADD; color: #0a1e2e; }
+/* ══════════════════════════════════════════
+   INPUT TABLE (the main new feature)
+══════════════════════════════════════════ */
+.input-section { margin-bottom:20px; }
+.input-section-title { font-size:13px; font-weight:600; color:var(--text-primary); padding:10px 0 8px; border-bottom:0.5px solid var(--border); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.input-section-title .tag { font-size:10px; font-weight:600; padding:2px 8px; border-radius:20px; background:var(--bg-secondary); color:var(--text-secondary); }
 
-  /* ── OPTIMIZER CHANNEL CARDS ── */
-  .opt-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-  .opt-channel {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-md);
-    padding: 14px;
-  }
-  .opt-name  { font-size: 12px; font-weight: 600; margin-bottom: 6px; }
-  .opt-curr  { font-size: 11px; color: var(--text-secondary); margin-bottom: 2px; }
-  .opt-rec   { font-size: 18px; font-weight: 600; }
-  .opt-delta { font-size: 11px; margin-top: 3px; }
-  .delta-up   { color: #3B6D11; }
-  .delta-down { color: #A32D2D; }
-  .delta-same { color: var(--text-secondary); }
-  .bar-track { height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; }
-  .bar-fill  { height: 4px; border-radius: 2px; }
+/* Campaign info grid */
+.ci-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; margin-bottom:14px; }
+.ci-field { display:flex; flex-direction:column; gap:4px; }
+.ci-field label { font-size:10px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.05em; }
+.ci-field input, .ci-field select {
+  padding:8px 10px; border-radius:var(--radius-md); border:0.5px solid var(--border-md);
+  background:var(--bg-primary); color:var(--text-primary); font-size:13px; outline:none;
+  transition:border .15s;
+}
+.ci-field input:focus, .ci-field select:focus { border-color:#378ADD; box-shadow:0 0 0 3px rgba(55,138,221,.12); }
 
-  /* ── SCENARIO ── */
-  .scenario-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
-  .s-tab {
-    padding: 7px 16px;
-    border-radius: 20px;
-    border: 0.5px solid var(--border-md);
-    background: transparent;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-secondary);
-  }
-  .s-tab.active {
-    background: var(--text-primary);
-    color: var(--bg-primary);
-    border-color: var(--text-primary);
-  }
+/* Channel data table */
+.ch-table-wrap { overflow-x:auto; margin-bottom:14px; }
+.ch-table { width:100%; border-collapse:collapse; font-size:12px; min-width:1100px; }
+.ch-table th {
+  text-align:center; padding:8px 6px; font-size:10px; font-weight:600;
+  color:var(--text-secondary); text-transform:uppercase; letter-spacing:.04em;
+  background:var(--bg-secondary); border-bottom:0.5px solid var(--border);
+  white-space:nowrap; position:sticky; top:0; z-index:10;
+}
+.ch-table th.col-channel { text-align:left; padding-left:10px; }
+.ch-table td { padding:4px 4px; border-bottom:0.5px solid var(--border); vertical-align:middle; }
+.ch-table td.col-channel { padding-left:10px; }
+.ch-table tr:last-child td { border-bottom:none; }
+.ch-table tr:hover td { background:var(--bg-secondary); }
 
-  /* ── PROJ GRID ── */
-  .proj-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-top: 14px;
-  }
-  .proj-card {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-md);
-    padding: 14px;
-    text-align: center;
-  }
-  .proj-label { font-size: 10px; color: var(--text-secondary); margin-bottom: 5px; }
-  .proj-val   { font-size: 20px; font-weight: 600; }
-  .proj-delta { font-size: 11px; margin-top: 3px; }
+/* Channel name input */
+.inp-ch-name {
+  width:130px; padding:6px 8px; border-radius:6px;
+  border:0.5px solid var(--border-md); background:var(--bg-primary);
+  color:var(--text-primary); font-size:12px; font-weight:600; outline:none;
+}
+.inp-ch-name:focus { border-color:#378ADD; }
 
-  /* ── FORM ── */
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .form-group { display: flex; flex-direction: column; gap: 5px; }
-  .form-group label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: .04em;
-  }
-  .form-group input,
-  .form-group select {
-    padding: 9px 12px;
-    border-radius: var(--radius-md);
-    border: 0.5px solid var(--border-md);
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-size: 13px;
-    outline: none;
-  }
-  .form-group input:focus,
-  .form-group select:focus {
-    border-color: #378ADD;
-    box-shadow: 0 0 0 3px rgba(55,138,221,0.12);
-  }
-  .section-header {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 18px 0 10px;
-    padding-bottom: 8px;
-    border-bottom: 0.5px solid var(--border);
-  }
-  .btn-primary {
-    padding: 11px 22px;
-    background: var(--text-primary);
-    color: var(--bg-primary);
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 14px;
-    transition: opacity .15s;
-  }
-  .btn-primary:hover { opacity: 0.85; }
+/* Numeric cells */
+.inp-num {
+  width:90px; padding:6px 8px; border-radius:6px; text-align:right;
+  border:0.5px solid var(--border-md); background:var(--bg-primary);
+  color:var(--text-primary); font-size:12px; outline:none;
+}
+.inp-num:focus { border-color:#378ADD; box-shadow:0 0 0 2px rgba(55,138,221,.1); }
+.inp-num.w-sm  { width:70px; }
+.inp-num.w-lg  { width:110px; }
 
-  /* ── ADSTOCK / SATURATION CONTROLS ── */
-  .ctrl-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-  }
-  .ctrl-row label { font-size: 11px; color: var(--text-secondary); min-width: 130px; }
-  .ctrl-row input[type=range] { flex: 1; min-width: 120px; accent-color: #378ADD; }
-  .ctrl-row span { font-size: 13px; font-weight: 600; min-width: 50px; text-align: right; }
+/* Computed cells (read-only) */
+.cell-computed {
+  width:90px; padding:6px 8px; border-radius:6px; text-align:right;
+  background:var(--bg-secondary); color:var(--text-secondary);
+  font-size:12px; border:0.5px solid transparent;
+  display:block;
+}
 
-  .ch-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
-  .ch-tab {
-    padding: 5px 12px;
-    border-radius: 20px;
-    border: 0.5px solid var(--border-md);
-    background: transparent;
-    cursor: pointer;
-    font-size: 11px;
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
-  .ch-tab.active {
-    background: var(--text-primary);
-    color: var(--bg-primary);
-    border-color: var(--text-primary);
-  }
+/* Add/remove channel */
+.btn-add-ch { padding:8px 16px; border:0.5px dashed var(--border-md); border-radius:var(--radius-md); background:transparent; color:var(--text-secondary); font-size:12px; cursor:pointer; width:100%; margin-bottom:14px; }
+.btn-add-ch:hover { background:var(--bg-secondary); color:var(--text-primary); }
+.btn-del-ch { width:26px; height:26px; border-radius:50%; border:none; background:transparent; color:var(--text-secondary); cursor:pointer; font-size:16px; line-height:1; display:flex; align-items:center; justify-content:center; }
+.btn-del-ch:hover { background:#FCEBEB; color:#A32D2D; }
 
-  /* ── SCORE BARS ── */
-  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
-  .score-name { width: 120px; font-size: 12px; flex-shrink: 0; }
-  .score-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; }
-  .score-bar   { height: 6px; border-radius: 3px; transition: width .3s; }
-  .score-val   { width: 32px; text-align: right; font-size: 12px; font-weight: 600; }
+/* Apply button */
+.apply-bar { display:flex; align-items:center; gap:12px; padding:14px; background:var(--bg-secondary); border-radius:var(--radius-lg); border:0.5px solid var(--border); margin-bottom:14px; }
+.apply-bar p { font-size:12px; color:var(--text-secondary); flex:1; line-height:1.5; }
+.btn-apply { padding:10px 22px; background:var(--accent); color:#fff; border:none; border-radius:var(--radius-md); font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+.btn-apply:hover { opacity:.85; }
+.btn-reset { padding:10px 16px; background:transparent; color:var(--text-secondary); border:0.5px solid var(--border-md); border-radius:var(--radius-md); font-size:13px; font-weight:500; cursor:pointer; white-space:nowrap; }
+.btn-reset:hover { background:var(--bg-primary); }
 
-  /* ── BEST/WORST CARDS ── */
-  .bw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+/* Toast notification */
+.toast { position:fixed; bottom:24px; right:24px; background:var(--text-primary); color:var(--bg-primary); padding:12px 20px; border-radius:var(--radius-md); font-size:13px; font-weight:500; z-index:999; opacity:0; transform:translateY(10px); transition:all .3s; pointer-events:none; }
+.toast.show { opacity:1; transform:translateY(0); }
 
-  /* ── RESPONSIVE ── */
-  @media (max-width: 700px) {
-    .app { padding: 12px 14px; }
-    .charts-row { grid-template-columns: 1fr; }
-    .opt-grid { grid-template-columns: 1fr 1fr; }
-    .form-grid { grid-template-columns: 1fr; }
-    .proj-grid { grid-template-columns: repeat(2, 1fr); }
-    .bw-grid { grid-template-columns: 1fr; }
-  }
+/* Column group headers */
+.col-group { background:var(--bg-tertiary) !important; font-size:9px !important; color:var(--text-secondary) !important; }
+
+/* Adstock params in input */
+.adstock-params { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:6px; background:var(--bg-tertiary); border-radius:6px; }
+.ap-field { display:flex; flex-direction:column; gap:2px; }
+.ap-field label { font-size:9px; color:var(--text-secondary); }
+.ap-field input { width:100%; padding:4px 6px; border-radius:4px; border:0.5px solid var(--border-md); background:var(--bg-primary); color:var(--text-primary); font-size:11px; text-align:right; outline:none; }
+
+/* Table overflow */
+.tbl-wrap { overflow-x:auto; }
+table.perf-table { width:100%; border-collapse:collapse; font-size:12px; }
+table.perf-table th { text-align:left; padding:9px 12px; font-size:10px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; border-bottom:0.5px solid var(--border); white-space:nowrap; background:var(--bg-secondary); }
+table.perf-table td { padding:10px 12px; border-bottom:0.5px solid var(--border); white-space:nowrap; }
+table.perf-table tr:last-child td { border-bottom:none; }
+table.perf-table tr:hover td { background:var(--bg-secondary); }
+
+@media(max-width:700px){
+  .charts-row { grid-template-columns:1fr; }
+  .proj-grid { grid-template-columns:repeat(2,1fr); }
+  .bw-grid { grid-template-columns:1fr; }
+  .opt-grid { grid-template-columns:1fr 1fr; }
+}
 </style>
 </head>
 <body>
@@ -385,492 +225,676 @@
   <div class="header-logo">
     <div class="header-dot">M</div>
     <div>
-      <div class="header-title">Media Mix Modelling Dashboard</div>
-      <div class="header-sub">Campaign Analytics & Budget Optimizer</div>
+      <div class="header-title">MMM Dashboard <span style="font-size:11px;font-weight:400;color:var(--text-secondary);">v2</span></div>
+      <div class="header-sub">Media Mix Modelling — Campaign Analytics & Budget Optimizer</div>
     </div>
   </div>
-  <div class="header-meta">Telkomsel — IndiHome Plus · Q2 2025</div>
+  <div class="header-right">
+    <div class="header-campaign" id="header-campaign-label">—</div>
+    <button class="btn-save" onclick="exportData()">Export JSON</button>
+  </div>
 </header>
 
 <!-- MAIN NAV -->
 <nav class="main-nav">
-  <button class="main-nav-btn active" onclick="showMain('dashboard', this)">Dashboard</button>
-  <button class="main-nav-btn" onclick="showMain('channels', this)">Channel Detail</button>
-  <button class="main-nav-btn" onclick="showMain('optimizer', this)">Optimizer</button>
-  <button class="main-nav-btn" onclick="showMain('scenarios', this)">Scenarios</button>
-  <button class="main-nav-btn" onclick="showMain('adstock', this)">Adstock Decay</button>
-  <button class="main-nav-btn" onclick="showMain('saturation', this)">Saturation Curves</button>
-  <button class="main-nav-btn" onclick="showMain('combined', this)">Combined MMM</button>
-  <button class="main-nav-btn" onclick="showMain('input', this)">Input Data</button>
+  <button class="main-nav-btn" onclick="showMain('input',this)">&#9998; Input Data</button>
+  <button class="main-nav-btn active" onclick="showMain('dashboard',this)">Dashboard</button>
+  <button class="main-nav-btn" onclick="showMain('channels',this)">Channel Detail</button>
+  <button class="main-nav-btn" onclick="showMain('optimizer',this)">Optimizer</button>
+  <button class="main-nav-btn" onclick="showMain('scenarios',this)">Scenarios</button>
+  <button class="main-nav-btn" onclick="showMain('adstock',this)">Adstock</button>
+  <button class="main-nav-btn" onclick="showMain('saturation',this)">Saturation</button>
+  <button class="main-nav-btn" onclick="showMain('combined',this)">Combined MMM</button>
 </nav>
 
 <main class="app">
 
-  <!-- ═══════════════ DASHBOARD ═══════════════ -->
-  <section id="panel-dashboard" class="panel active">
-    <div class="kpi-grid">
-      <div class="kpi"><div class="kpi-label">Total Budget Spent</div><div class="kpi-value" id="kpi-budget">—</div></div>
-      <div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value" id="kpi-revenue">—</div></div>
-      <div class="kpi"><div class="kpi-label">Overall ROAS</div><div class="kpi-value" id="kpi-roas">—</div></div>
-      <div class="kpi"><div class="kpi-label">Total Transactions</div><div class="kpi-value" id="kpi-trx">—</div></div>
-      <div class="kpi"><div class="kpi-label">Total Impressions</div><div class="kpi-value" id="kpi-impr">—</div></div>
-      <div class="kpi"><div class="kpi-label">Overall CVR</div><div class="kpi-value" id="kpi-cvr">—</div></div>
-      <div class="kpi"><div class="kpi-label">Overall CTR</div><div class="kpi-value" id="kpi-ctr">—</div></div>
-      <div class="kpi"><div class="kpi-label">Avg Cost/Conv</div><div class="kpi-value" id="kpi-cpa">—</div></div>
-    </div>
+<!-- ══════════════ INPUT DATA ══════════════ -->
+<section id="panel-input" class="panel">
 
-    <div class="bw-grid">
-      <div class="card" style="border-left:3px solid #639922;margin-bottom:0;">
-        <div class="kpi-label" style="color:#3B6D11;">Best Performing Channel</div>
-        <div style="font-size:18px;font-weight:600;margin-top:5px;" id="best-channel">—</div>
-        <div class="kpi-sub" id="best-detail">—</div>
-      </div>
-      <div class="card" style="border-left:3px solid #E24B4A;margin-bottom:0;">
-        <div class="kpi-label" style="color:#A32D2D;">Needs Attention</div>
-        <div style="font-size:18px;font-weight:600;margin-top:5px;" id="worst-channel">—</div>
-        <div class="kpi-sub" id="worst-detail">—</div>
-      </div>
-    </div>
-    <div style="height:14px;"></div>
+  <!-- Apply bar -->
+  <div class="apply-bar">
+    <p>Isi semua data campaign di bawah, lalu klik <strong>Apply & Analyze</strong> untuk memperbarui seluruh dashboard, optimizer, adstock, dan saturation curve secara otomatis.</p>
+    <button class="btn-reset" onclick="resetToDefault()">Reset ke Default</button>
+    <button class="btn-apply" onclick="applyAndAnalyze()">&#10003; Apply & Analyze</button>
+  </div>
 
-    <div class="charts-row">
-      <div class="card">
-        <div class="card-title">Budget Share by Channel</div>
-        <div id="legend-budget" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;font-size:11px;color:var(--text-secondary);"></div>
-        <div class="chart-wrap" style="height:170px;"><canvas id="chartBudget" role="img" aria-label="Budget share by channel doughnut chart">Budget allocation across media channels.</canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">ROAS by Channel</div>
-        <div class="chart-wrap" style="height:190px;"><canvas id="chartROAS" role="img" aria-label="ROAS comparison bar chart">ROAS performance by media channel.</canvas></div>
+  <div class="card">
+    <!-- CAMPAIGN INFO -->
+    <div class="input-section">
+      <div class="input-section-title">Campaign Information <span class="tag">Step 1</span></div>
+      <div class="ci-grid">
+        <div class="ci-field"><label>Campaign Name</label><input type="text" id="ci-name" value="Telkomsel Brand Campaign Q2 2025"></div>
+        <div class="ci-field"><label>Brand / Product</label><input type="text" id="ci-brand" value="Telkomsel — IndiHome Plus"></div>
+        <div class="ci-field"><label>Campaign Period</label><input type="text" id="ci-period" value="Apr–Jun 2025"></div>
+        <div class="ci-field"><label>Campaign Objective</label>
+          <select id="ci-obj"><option>Conversion</option><option>Acquisition</option><option>Awareness</option><option>Retention</option><option>Traffic</option></select>
+        </div>
+        <div class="ci-field"><label>Target Audience</label><input type="text" id="ci-audience" value="Urban 25–45, existing & new subscribers"></div>
+        <div class="ci-field"><label>Region / Market</label><input type="text" id="ci-region" value="Jawa & Bali"></div>
+        <div class="ci-field"><label>Campaign Type</label>
+          <select id="ci-type"><option>Thematic</option><option>Tactical</option><option>Always-on</option><option>Seasonal</option></select>
+        </div>
+        <div class="ci-field"><label>Business Target</label>
+          <select id="ci-btarget"><option>Transactions</option><option>Revenue</option><option>ROAS</option><option>Leads</option></select>
+        </div>
       </div>
     </div>
 
-    <div class="charts-row">
-      <div class="card">
-        <div class="card-title">Transaction Contribution by Channel</div>
-        <div class="chart-wrap" style="height:180px;"><canvas id="chartTrx" role="img" aria-label="Transaction contribution horizontal bar chart">Transaction contribution by channel.</canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Efficiency Scores</div>
-        <div id="score-bars"></div>
+    <!-- EXTERNAL FACTORS -->
+    <div class="input-section">
+      <div class="input-section-title">External Factors <span class="tag">Step 2</span></div>
+      <div class="ci-grid">
+        <div class="ci-field"><label>Seasonality</label>
+          <select id="ci-season"><option>Mid-season</option><option>Peak season</option><option>Low season</option></select>
+        </div>
+        <div class="ci-field"><label>Promo Discount Active</label>
+          <select id="ci-promo"><option>Yes</option><option>No</option></select>
+        </div>
+        <div class="ci-field"><label>Competitor Intensity</label>
+          <select id="ci-comp"><option>Medium</option><option>High</option><option>Low</option></select>
+        </div>
+        <div class="ci-field"><label>Payday Period Overlap</label>
+          <select id="ci-payday"><option>Partial</option><option>Full</option><option>None</option></select>
+        </div>
+        <div class="ci-field"><label>Public Holidays in Period</label><input type="number" id="ci-holidays" value="3" min="0"></div>
+        <div class="ci-field"><label>Brand Equity Score (0–100)</label><input type="number" id="ci-equity" value="72" min="0" max="100"></div>
+        <div class="ci-field"><label>Macro Trend</label>
+          <select id="ci-macro"><option>Neutral</option><option>Positive</option><option>Negative</option></select>
+        </div>
+        <div class="ci-field"><label>Risk Tolerance</label>
+          <select id="ci-risk"><option value="balanced">Balanced</option><option value="conservative">Conservative</option><option value="aggressive">Aggressive</option></select>
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title">MMM Insight Panel</div>
-      <div id="insight-list"></div>
+    <!-- NEXT CAMPAIGN -->
+    <div class="input-section">
+      <div class="input-section-title">Next Campaign Planning <span class="tag">Step 3</span></div>
+      <div class="ci-grid">
+        <div class="ci-field"><label>Next Campaign Budget (Rp Juta)</label><input type="number" id="ci-nextbudget" value="14000" min="0"></div>
+        <div class="ci-field"><label>Target Transactions</label><input type="number" id="ci-targettrx" value="85000" min="0"></div>
+        <div class="ci-field"><label>Minimum ROAS</label><input type="number" id="ci-minroas" value="4.5" min="0" step="0.1"></div>
+        <div class="ci-field"><label>Max Cost/Conversion (Rp)</label><input type="number" id="ci-maxcpa" value="175000" min="0"></div>
+        <div class="ci-field"><label>Target CTR (%)</label><input type="number" id="ci-targetctr" value="1.5" min="0" step="0.1"></div>
+        <div class="ci-field"><label>Priority Channel</label>
+          <select id="ci-priority"><option>Google Ads</option><option>Meta Ads</option><option>TikTok Ads</option><option>CRM Push</option><option>YouTube</option></select>
+        </div>
+      </div>
     </div>
-  </section>
 
-  <!-- ═══════════════ CHANNELS ═══════════════ -->
-  <section id="panel-channels" class="panel">
-    <div class="card">
-      <div class="card-title">Channel Performance Table</div>
-      <div class="tbl-wrap">
-        <table>
+    <!-- CHANNEL DATA TABLE -->
+    <div class="input-section">
+      <div class="input-section-title">Channel Performance Data <span class="tag">Step 4 — Edit langsung di tabel</span></div>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6;">
+        Isi data aktual per channel. Kolom <strong>CTR, CPC, CVR, CPA, ROAS</strong> dihitung otomatis dari input kamu. Kolom <strong>Decay λ, K, α</strong> dipakai untuk model adstock dan saturation.
+      </p>
+
+      <div class="ch-table-wrap">
+        <table class="ch-table" id="ch-table">
           <thead>
             <tr>
-              <th>Channel</th><th>Budget</th><th>% Share</th><th>Impressions</th>
-              <th>Clicks</th><th>CTR</th><th>CPC</th><th>Transactions</th>
-              <th>CPA</th><th>Revenue</th><th>ROAS</th><th>Score</th><th>Action</th>
+              <th class="col-channel" rowspan="2">Channel</th>
+              <th colspan="3" class="col-group">Spend & Reach</th>
+              <th colspan="3" class="col-group">Engagement</th>
+              <th colspan="4" class="col-group">Conversion</th>
+              <th colspan="3" class="col-group">MMM Params</th>
+              <th rowspan="2"></th>
+            </tr>
+            <tr>
+              <th>Budget<br><small style="font-weight:400;">(Rp Juta)</small></th>
+              <th>Impressions</th>
+              <th>Reach</th>
+              <th>Clicks</th>
+              <th>CTR%<br><small style="font-weight:400;color:#93c;">(auto)</small></th>
+              <th>CPC<br><small style="font-weight:400;color:#93c;">(auto)</small></th>
+              <th>Transactions</th>
+              <th>Revenue<br><small style="font-weight:400;">(Rp)</small></th>
+              <th>CPA<br><small style="font-weight:400;color:#93c;">(auto)</small></th>
+              <th>ROAS<br><small style="font-weight:400;color:#93c;">(auto)</small></th>
+              <th>Decay λ</th>
+              <th>Sat K<br><small style="font-weight:400;">(Juta)</small></th>
+              <th>Shape α</th>
             </tr>
           </thead>
-          <tbody id="channel-tbody"></tbody>
+          <tbody id="ch-tbody"></tbody>
         </table>
       </div>
-    </div>
-    <div class="charts-row">
-      <div class="card">
-        <div class="card-title">Budget vs Revenue Contribution</div>
-        <div class="chart-wrap" style="height:220px;"><canvas id="chartBvR" role="img" aria-label="Budget vs revenue grouped bar chart">Budget vs revenue by channel.</canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Cost per Conversion by Channel</div>
-        <div class="chart-wrap" style="height:220px;"><canvas id="chartCPA" role="img" aria-label="CPA horizontal bar chart">Cost per conversion by channel.</canvas></div>
-      </div>
-    </div>
-  </section>
 
-  <!-- ═══════════════ OPTIMIZER ═══════════════ -->
-  <section id="panel-optimizer" class="panel">
-    <div class="card">
-      <div class="card-title">Recommended Budget Allocation — Next Campaign</div>
-      <div class="opt-grid" id="opt-grid"></div>
+      <button class="btn-add-ch" onclick="addChannel()">+ Tambah Channel</button>
     </div>
+  </div>
+
+  <!-- bottom apply bar -->
+  <div class="apply-bar">
+    <p>Setelah semua data terisi, klik Apply untuk memperbarui seluruh analisis.</p>
+    <button class="btn-reset" onclick="resetToDefault()">Reset ke Default</button>
+    <button class="btn-apply" onclick="applyAndAnalyze()">&#10003; Apply & Analyze</button>
+  </div>
+</section>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<section id="panel-dashboard" class="panel active">
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Total Budget Spent</div><div class="kpi-value" id="kpi-budget">—</div></div>
+    <div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value" id="kpi-revenue">—</div></div>
+    <div class="kpi"><div class="kpi-label">Overall ROAS</div><div class="kpi-value" id="kpi-roas">—</div></div>
+    <div class="kpi"><div class="kpi-label">Total Transactions</div><div class="kpi-value" id="kpi-trx">—</div></div>
+    <div class="kpi"><div class="kpi-label">Total Impressions</div><div class="kpi-value" id="kpi-impr">—</div></div>
+    <div class="kpi"><div class="kpi-label">Overall CVR</div><div class="kpi-value" id="kpi-cvr">—</div></div>
+    <div class="kpi"><div class="kpi-label">Overall CTR</div><div class="kpi-value" id="kpi-ctr">—</div></div>
+    <div class="kpi"><div class="kpi-label">Avg Cost/Conv</div><div class="kpi-value" id="kpi-cpa">—</div></div>
+  </div>
+  <div class="bw-grid">
+    <div class="card" style="border-left:3px solid #639922;margin-bottom:0;">
+      <div class="kpi-label" style="color:#3B6D11;">Best Performing Channel</div>
+      <div style="font-size:18px;font-weight:600;margin-top:5px;" id="best-channel">—</div>
+      <div class="kpi-sub" id="best-detail">—</div>
+    </div>
+    <div class="card" style="border-left:3px solid #E24B4A;margin-bottom:0;">
+      <div class="kpi-label" style="color:#A32D2D;">Needs Attention</div>
+      <div style="font-size:18px;font-weight:600;margin-top:5px;" id="worst-channel">—</div>
+      <div class="kpi-sub" id="worst-detail">—</div>
+    </div>
+  </div>
+  <div style="height:14px;"></div>
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">Budget Share by Channel</div>
+      <div id="legend-budget" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;font-size:11px;color:var(--text-secondary);"></div>
+      <div class="chart-wrap" style="height:170px;"><canvas id="chartBudget" role="img" aria-label="Budget share doughnut">Budget by channel.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">ROAS by Channel</div>
+      <div class="chart-wrap" style="height:190px;"><canvas id="chartROAS" role="img" aria-label="ROAS bar chart">ROAS by channel.</canvas></div>
+    </div>
+  </div>
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">Transaction Contribution</div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="chartTrx" role="img" aria-label="Transaction contribution horizontal bar">Transactions by channel.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Efficiency Scores</div>
+      <div id="score-bars"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">MMM Insight Panel</div>
+    <div id="insight-list"></div>
+  </div>
+</section>
+
+<!-- ══════════════ CHANNELS ══════════════ -->
+<section id="panel-channels" class="panel">
+  <div class="card">
+    <div class="card-title">Channel Performance Table</div>
+    <div class="tbl-wrap">
+      <table class="perf-table">
+        <thead><tr>
+          <th>Channel</th><th>Budget</th><th>% Share</th><th>Impressions</th>
+          <th>Clicks</th><th>CTR</th><th>CPC</th><th>Transactions</th>
+          <th>CPA</th><th>Revenue</th><th>ROAS</th><th>Score</th><th>Action</th>
+        </tr></thead>
+        <tbody id="channel-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">Budget vs Revenue</div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="chartBvR" role="img" aria-label="Budget vs revenue bar">Budget vs revenue.</canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Cost per Conversion</div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="chartCPA" role="img" aria-label="CPA horizontal bar">CPA by channel.</canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ OPTIMIZER ══════════════ -->
+<section id="panel-optimizer" class="panel">
+  <div class="card">
+    <div class="card-title">Recommended Budget Allocation — Next Campaign</div>
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Next campaign budget: <strong id="opt-total-budget">—</strong></div>
+    <div class="opt-grid" id="opt-grid"></div>
+  </div>
+  <div class="proj-grid">
+    <div class="proj-card"><div class="proj-label">Projected Transactions</div><div class="proj-val" id="proj-trx">—</div><div class="proj-delta delta-up" id="proj-trx-d">—</div></div>
+    <div class="proj-card"><div class="proj-label">Projected Revenue</div><div class="proj-val" id="proj-rev">—</div><div class="proj-delta delta-up" id="proj-rev-d">—</div></div>
+    <div class="proj-card"><div class="proj-label">Projected ROAS</div><div class="proj-val" id="proj-roas">—</div><div class="proj-delta delta-up" id="proj-roas-d">—</div></div>
+    <div class="proj-card"><div class="proj-label">Projected CPA</div><div class="proj-val" id="proj-cpa">—</div><div class="proj-delta delta-down" id="proj-cpa-d">—</div></div>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <div class="card-title">Reallocation Reasoning</div>
+    <div id="opt-reasoning" style="font-size:12px;line-height:1.9;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Budget Shift Visualization</div>
+    <div class="chart-wrap" style="height:240px;"><canvas id="chartShift" role="img" aria-label="Budget shift bar">Current vs recommended budget.</canvas></div>
+  </div>
+</section>
+
+<!-- ══════════════ SCENARIOS ══════════════ -->
+<section id="panel-scenarios" class="panel">
+  <div class="s-tabs">
+    <button class="s-tab active" onclick="selectScenario('conservative',this)">Conservative</button>
+    <button class="s-tab" onclick="selectScenario('balanced',this)">Balanced</button>
+    <button class="s-tab" onclick="selectScenario('aggressive',this)">Aggressive</button>
+  </div>
+  <div class="card">
+    <div class="card-title" id="sc-title">—</div>
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;" id="sc-desc">—</div>
     <div class="proj-grid">
-      <div class="proj-card"><div class="proj-label">Projected Transactions</div><div class="proj-val" id="proj-trx">—</div><div class="proj-delta delta-up" id="proj-trx-d">—</div></div>
-      <div class="proj-card"><div class="proj-label">Projected Revenue</div><div class="proj-val" id="proj-rev">—</div><div class="proj-delta delta-up" id="proj-rev-d">—</div></div>
-      <div class="proj-card"><div class="proj-label">Projected ROAS</div><div class="proj-val" id="proj-roas">—</div><div class="proj-delta delta-up" id="proj-roas-d">—</div></div>
-      <div class="proj-card"><div class="proj-label">Projected CPA</div><div class="proj-val" id="proj-cpa">—</div><div class="proj-delta delta-down" id="proj-cpa-d">—</div></div>
+      <div class="proj-card"><div class="proj-label">Budget</div><div class="proj-val" id="sc-budget">—</div></div>
+      <div class="proj-card"><div class="proj-label">Transactions</div><div class="proj-val" id="sc-trx">—</div><div class="proj-delta" id="sc-trx-d">—</div></div>
+      <div class="proj-card"><div class="proj-label">Revenue</div><div class="proj-val" id="sc-rev">—</div><div class="proj-delta" id="sc-rev-d">—</div></div>
+      <div class="proj-card"><div class="proj-label">ROAS</div><div class="proj-val" id="sc-roas">—</div></div>
     </div>
-    <div class="card" style="margin-top:14px;">
-      <div class="card-title">Reallocation Reasoning</div>
-      <div id="opt-reasoning" style="font-size:12px;line-height:1.9;"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Budget Shift Visualization</div>
-      <div class="chart-wrap" style="height:240px;"><canvas id="chartShift" role="img" aria-label="Current vs recommended budget">Current vs recommended budget.</canvas></div>
-    </div>
-  </section>
+    <div style="margin-top:14px;"><div class="card-title" style="margin-bottom:8px;">Allocation by Channel</div><div id="sc-alloc"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Scenario Comparison</div>
+    <div class="chart-wrap" style="height:220px;"><canvas id="chartScenario" role="img" aria-label="Scenario comparison bar">Scenario comparison.</canvas></div>
+  </div>
+</section>
 
-  <!-- ═══════════════ SCENARIOS ═══════════════ -->
-  <section id="panel-scenarios" class="panel">
-    <div class="scenario-tabs">
-      <button class="s-tab active" onclick="selectScenario('conservative',this)">Conservative</button>
-      <button class="s-tab" onclick="selectScenario('balanced',this)">Balanced</button>
-      <button class="s-tab" onclick="selectScenario('aggressive',this)">Aggressive</button>
+<!-- ══════════════ ADSTOCK ══════════════ -->
+<section id="panel-adstock" class="panel">
+  <div class="card">
+    <div class="card-title">Adstock Decay Model — Carryover Effect</div>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;line-height:1.7;">Adstock models how advertising effects persist beyond the period they ran. Decay rate (λ) dari setiap channel diambil dari data input kamu (kolom Decay λ di tabel channel).</p>
+    <div class="ch-tabs" id="adstock-tabs"></div>
+    <div class="ctrl-row">
+      <label>Decay rate (λ)</label>
+      <input type="range" id="sl-decay" min="0" max="0.95" step="0.05" value="0.4" oninput="updateAdstock()">
+      <span id="lbl-decay">0.40</span>
     </div>
-    <div class="card">
-      <div class="card-title" id="scenario-title">—</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;" id="scenario-desc">—</div>
-      <div class="proj-grid">
-        <div class="proj-card"><div class="proj-label">Budget</div><div class="proj-val" id="sc-budget">—</div></div>
-        <div class="proj-card"><div class="proj-label">Transactions</div><div class="proj-val" id="sc-trx">—</div><div class="proj-delta" id="sc-trx-d">—</div></div>
-        <div class="proj-card"><div class="proj-label">Revenue</div><div class="proj-val" id="sc-rev">—</div><div class="proj-delta" id="sc-rev-d">—</div></div>
-        <div class="proj-card"><div class="proj-label">ROAS</div><div class="proj-val" id="sc-roas">—</div></div>
-      </div>
-      <div style="margin-top:14px;">
-        <div class="card-title" style="margin-bottom:8px;">Budget Allocation by Channel</div>
-        <div id="sc-alloc"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Scenario Comparison</div>
-      <div class="chart-wrap" style="height:220px;"><canvas id="chartScenario" role="img" aria-label="Scenario comparison bar chart">Scenario comparison across key metrics.</canvas></div>
-    </div>
-  </section>
-
-  <!-- ═══════════════ ADSTOCK ═══════════════ -->
-  <section id="panel-adstock" class="panel">
-    <div class="card">
-      <div class="card-title">Adstock Decay Model — Carryover Effect</div>
-      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;line-height:1.7;">
-        Adstock models how advertising effects persist beyond the period they ran. A decay rate (λ) of 0.0 = no carryover; 0.9 = very long memory. TV and OOH typically have high carryover; digital performance channels have low carryover.
-      </p>
-      <div class="ch-tabs" id="adstock-tabs"></div>
-      <div class="ctrl-row">
-        <label>Decay rate (λ)</label>
-        <input type="range" id="sl-decay" min="0" max="0.95" step="0.05" value="0.4" oninput="updateAdstock()">
-        <span id="lbl-decay">0.40</span>
-      </div>
-      <div class="ctrl-row">
-        <label>Max lag weeks</label>
-        <input type="range" id="sl-lag" min="4" max="26" step="1" value="12" oninput="updateAdstock()">
-        <span id="lbl-lag">12 wks</span>
-      </div>
-      <div class="charts-row">
-        <div>
-          <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;">Weekly spend with adstock carryover</div>
-          <div class="chart-wrap" style="height:190px;"><canvas id="cAdstockSpend" role="img" aria-label="Weekly spend vs adstock line chart">Weekly spend vs adstock-adjusted spend.</canvas></div>
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;">Decay weight per lag week</div>
-          <div class="chart-wrap" style="height:190px;"><canvas id="cAdstockDecay" role="img" aria-label="Decay weight per week bar chart">Adstock decay weight by week.</canvas></div>
-        </div>
-      </div>
-      <div class="kpi-grid" style="margin-top:14px;">
-        <div class="kpi"><div class="kpi-label">Total Raw Spend</div><div class="kpi-value" id="kpi-raw">—</div></div>
-        <div class="kpi"><div class="kpi-label">Adstocked GRP</div><div class="kpi-value" id="kpi-adst">—</div></div>
-        <div class="kpi"><div class="kpi-label">Carryover Effect</div><div class="kpi-value" id="kpi-carry">—</div></div>
-        <div class="kpi"><div class="kpi-label">Half-Life</div><div class="kpi-value" id="kpi-halflife">—</div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Recommended Decay Rates by Channel Type</div>
-      <div id="decay-recs"></div>
-    </div>
-  </section>
-
-  <!-- ═══════════════ SATURATION ═══════════════ -->
-  <section id="panel-saturation" class="panel">
-    <div class="card">
-      <div class="card-title">Saturation Curve — Diminishing Returns Modeling</div>
-      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;line-height:1.7;">
-        At low spend, each additional rupiah drives strong response. Past the saturation inflection point, marginal returns fall rapidly. The Hill function models this: <em>response = spend<sup>α</sup> / (K<sup>α</sup> + spend<sup>α</sup>)</em>. K = half-saturation spend point, α = shape steepness.
-      </p>
-      <div class="ch-tabs" id="sat-tabs"></div>
-      <div class="ctrl-row">
-        <label>Shape steepness (α)</label>
-        <input type="range" id="sl-alpha" min="0.5" max="3" step="0.1" value="2.0" oninput="updateSat()">
-        <span id="lbl-alpha">2.0</span>
-      </div>
-      <div class="ctrl-row">
-        <label>Half-sat point K (Rp Jt)</label>
-        <input type="range" id="sl-K" min="200" max="5000" step="100" value="2800" oninput="updateSat()">
-        <span id="lbl-K">2800</span>
-      </div>
-      <div class="ctrl-row">
-        <label>Current budget (Rp Jt)</label>
-        <input type="range" id="sl-curr" min="100" max="5000" step="100" value="3200" oninput="updateSat()">
-        <span id="lbl-curr">3200</span>
-      </div>
-      <div class="charts-row">
-        <div>
-          <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;">Response curve</div>
-          <div class="chart-wrap" style="height:210px;"><canvas id="cSatCurve" role="img" aria-label="Saturation response curve">Saturation curve showing diminishing returns.</canvas></div>
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;">Marginal return per +Rp 100Jt</div>
-          <div class="chart-wrap" style="height:210px;"><canvas id="cMarginal" role="img" aria-label="Marginal return curve">Marginal return at each spend level.</canvas></div>
-        </div>
-      </div>
-      <div class="kpi-grid" style="margin-top:14px;">
-        <div class="kpi"><div class="kpi-label">Saturation Level</div><div class="kpi-value" id="sat-pct">—</div></div>
-        <div class="kpi"><div class="kpi-label">Status</div><div class="kpi-value" id="sat-status">—</div></div>
-        <div class="kpi"><div class="kpi-label">Half-sat Spend</div><div class="kpi-value" id="sat-opt">—</div></div>
-        <div class="kpi"><div class="kpi-label">Marginal Efficiency</div><div class="kpi-value" id="sat-marg">—</div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════ COMBINED MMM ═══════════════ -->
-  <section id="panel-combined" class="panel">
-    <div class="card">
-      <div class="card-title">Combined MMM — Adstock × Saturation Adjusted Contribution</div>
-      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;line-height:1.7;">
-        Both adstock carryover and saturation adjustment are applied to estimate true channel contribution. Over-saturated channels receive a contribution haircut; channels with strong carryover receive a boost reflecting their true multi-week value.
-      </p>
-      <div class="chart-wrap" style="height:250px;"><canvas id="cCombined" role="img" aria-label="MMM-adjusted revenue contribution stacked bar">Baseline vs incremental revenue by channel.</canvas></div>
+    <div class="ctrl-row">
+      <label>Max lag weeks</label>
+      <input type="range" id="sl-lag" min="4" max="26" step="1" value="12" oninput="updateAdstock()">
+      <span id="lbl-lag">12 wks</span>
     </div>
     <div class="charts-row">
-      <div class="card">
-        <div class="card-title">Raw vs MMM-Adjusted ROAS</div>
-        <div class="chart-wrap" style="height:210px;"><canvas id="cROASadj" role="img" aria-label="Raw vs adjusted ROAS comparison">Raw vs MMM-adjusted ROAS.</canvas></div>
+      <div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;">Weekly spend with adstock carryover</div>
+        <div class="chart-wrap" style="height:190px;"><canvas id="cAdstockSpend" role="img" aria-label="Adstock spend line">Weekly spend vs adstocked.</canvas></div>
       </div>
-      <div class="card">
-        <div class="card-title">Incremental Revenue Attribution</div>
-        <div class="chart-wrap" style="height:210px;"><canvas id="cIncremental" role="img" aria-label="Incremental revenue by channel doughnut">Incremental revenue share by channel.</canvas></div>
+      <div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;">Decay weight per lag week</div>
+        <div class="chart-wrap" style="height:190px;"><canvas id="cAdstockDecay" role="img" aria-label="Decay weight bar">Decay weight per week.</canvas></div>
       </div>
+    </div>
+    <div class="kpi-grid" style="margin-top:14px;">
+      <div class="kpi"><div class="kpi-label">Total Raw Spend</div><div class="kpi-value" id="kpi-raw">—</div></div>
+      <div class="kpi"><div class="kpi-label">Adstocked Total</div><div class="kpi-value" id="kpi-adst">—</div></div>
+      <div class="kpi"><div class="kpi-label">Carryover Effect</div><div class="kpi-value" id="kpi-carry">—</div></div>
+      <div class="kpi"><div class="kpi-label">Half-Life</div><div class="kpi-value" id="kpi-halflife">—</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Recommended Decay Rates by Channel Type</div>
+    <div id="decay-recs"></div>
+  </div>
+</section>
+
+<!-- ══════════════ SATURATION ══════════════ -->
+<section id="panel-saturation" class="panel">
+  <div class="card">
+    <div class="card-title">Saturation Curve — Diminishing Returns</div>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;line-height:1.7;">Parameter K dan α diambil dari data input kamu. Adjust slider untuk simulasi skenario spend yang berbeda.</p>
+    <div class="ch-tabs" id="sat-tabs"></div>
+    <div class="ctrl-row">
+      <label>Shape steepness (α)</label>
+      <input type="range" id="sl-alpha" min="0.5" max="3" step="0.1" value="2.0" oninput="updateSat()">
+      <span id="lbl-alpha">2.0</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Half-sat K (Rp Jt)</label>
+      <input type="range" id="sl-K" min="100" max="6000" step="100" value="2800" oninput="updateSat()">
+      <span id="lbl-K">2800</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Current budget (Rp Jt)</label>
+      <input type="range" id="sl-curr" min="50" max="6000" step="50" value="3200" oninput="updateSat()">
+      <span id="lbl-curr">3200</span>
+    </div>
+    <div class="charts-row">
+      <div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;">Response curve</div>
+        <div class="chart-wrap" style="height:210px;"><canvas id="cSatCurve" role="img" aria-label="Saturation curve">Saturation response.</canvas></div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;">Marginal return per +Rp 100Jt</div>
+        <div class="chart-wrap" style="height:210px;"><canvas id="cMarginal" role="img" aria-label="Marginal return curve">Marginal return.</canvas></div>
+      </div>
+    </div>
+    <div class="kpi-grid" style="margin-top:14px;">
+      <div class="kpi"><div class="kpi-label">Saturation Level</div><div class="kpi-value" id="sat-pct">—</div></div>
+      <div class="kpi"><div class="kpi-label">Status</div><div class="kpi-value" id="sat-status">—</div></div>
+      <div class="kpi"><div class="kpi-label">Half-sat Spend</div><div class="kpi-value" id="sat-opt">—</div></div>
+      <div class="kpi"><div class="kpi-label">Marginal Efficiency</div><div class="kpi-value" id="sat-marg">—</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ COMBINED ══════════════ -->
+<section id="panel-combined" class="panel">
+  <div class="card">
+    <div class="card-title">Combined MMM — Adstock × Saturation Adjusted Contribution</div>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;line-height:1.7;">Menggabungkan adstock carryover dan saturation adjustment untuk estimasi true channel contribution. Channel over-saturated mendapat haircut; channel dengan carryover tinggi mendapat boost.</p>
+    <div class="chart-wrap" style="height:250px;"><canvas id="cCombined" role="img" aria-label="MMM adjusted stacked bar">Baseline vs incremental revenue.</canvas></div>
+  </div>
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">Raw vs MMM-Adjusted ROAS</div>
+      <div class="chart-wrap" style="height:210px;"><canvas id="cROASadj" role="img" aria-label="Raw vs adjusted ROAS">ROAS comparison.</canvas></div>
     </div>
     <div class="card">
-      <div class="card-title">MMM Insights — Adstock & Saturation Adjusted</div>
-      <div id="combined-insights"></div>
+      <div class="card-title">Incremental Revenue Attribution</div>
+      <div class="chart-wrap" style="height:210px;"><canvas id="cIncremental" role="img" aria-label="Incremental revenue doughnut">Incremental revenue share.</canvas></div>
     </div>
-  </section>
-
-  <!-- ═══════════════ INPUT ═══════════════ -->
-  <section id="panel-input" class="panel">
-    <div class="card">
-      <div class="section-header">Campaign Information</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Campaign Name</label><input type="text" id="inp-name" value="Telkomsel Brand Campaign Q2 2025"></div>
-        <div class="form-group"><label>Brand / Product</label><input type="text" id="inp-brand" value="Telkomsel — IndiHome Plus"></div>
-        <div class="form-group"><label>Campaign Objective</label>
-          <select><option>Conversion</option><option>Acquisition</option><option>Awareness</option><option>Retention</option><option>Traffic</option></select>
-        </div>
-        <div class="form-group"><label>Total Budget (Rp Juta)</label><input type="number" id="inp-totalbudget" value="12500"></div>
-        <div class="form-group"><label>Campaign Period</label><input type="text" value="Apr–Jun 2025"></div>
-        <div class="form-group"><label>Target ROAS</label><input type="number" value="5.2" step="0.1"></div>
-      </div>
-
-      <div class="section-header">External Factors</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Seasonality</label><select><option>Mid-season</option><option>Peak season</option><option>Low season</option></select></div>
-        <div class="form-group"><label>Promo Discount Active</label><select><option>Yes</option><option>No</option></select></div>
-        <div class="form-group"><label>Competitor Intensity</label><select><option>Medium</option><option>High</option><option>Low</option></select></div>
-        <div class="form-group"><label>Payday Period Overlap</label><select><option>Partial</option><option>Full</option><option>None</option></select></div>
-        <div class="form-group"><label>Public Holidays in Period</label><input type="number" value="3"></div>
-        <div class="form-group"><label>Brand Equity Score (0–100)</label><input type="number" value="72"></div>
-      </div>
-
-      <div class="section-header">Next Campaign Planning</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Next Campaign Budget (Rp Juta)</label><input type="number" id="inp-nextbudget" value="14000"></div>
-        <div class="form-group"><label>Target Transactions</label><input type="number" value="85000"></div>
-        <div class="form-group"><label>Minimum ROAS</label><input type="number" value="4.5" step="0.1"></div>
-        <div class="form-group"><label>Max Cost/Conversion (Rp)</label><input type="number" value="175000"></div>
-        <div class="form-group"><label>Risk Tolerance</label>
-          <select><option value="balanced">Balanced</option><option value="conservative">Conservative</option><option value="aggressive">Aggressive</option></select>
-        </div>
-        <div class="form-group"><label>Priority Channel</label>
-          <select><option>Google Ads</option><option>Meta Ads</option><option>TikTok Ads</option><option>CRM Push</option></select>
-        </div>
-      </div>
-      <button class="btn-primary" onclick="applyInput()">Apply & Refresh Analysis</button>
-    </div>
-  </section>
+  </div>
+  <div class="card">
+    <div class="card-title">MMM Insights — Adstock & Saturation Adjusted</div>
+    <div id="combined-insights"></div>
+  </div>
+</section>
 
 </main>
 
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
-// ═══════════════════════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════════════════════
-const CHANNELS = [
-  { name:'Google Ads',    budget:3200, impr:42000000, clicks:840000, trx:22000, revenue:18480000000, ctr:2.0,  cpc:3810,  cvr:2.62, cpa:145454,  decay:0.40, K:2800, alpha:2.0 },
-  { name:'Meta Ads',      budget:2400, impr:56000000, clicks:672000, trx:15400, revenue:12166000000, ctr:1.2,  cpc:3571,  cvr:2.29, cpa:155844,  decay:0.35, K:2200, alpha:1.8 },
-  { name:'TikTok Ads',    budget:1100, impr:38000000, clicks:380000, trx:6200,  revenue:4092000000,  ctr:1.0,  cpc:2895,  cvr:1.63, cpa:177419,  decay:0.25, K:1800, alpha:1.5 },
-  { name:'YouTube',       budget:1800, impr:29000000, clicks:290000, trx:5800,  revenue:5220000000,  ctr:1.0,  cpc:6207,  cvr:2.00, cpa:310345,  decay:0.60, K:1600, alpha:1.6 },
-  { name:'Programmatic',  budget:900,  impr:74000000, clicks:222000, trx:2600,  revenue:1638000000,  ctr:0.3,  cpc:4054,  cvr:1.17, cpa:346154,  decay:0.20, K:1200, alpha:1.3 },
-  { name:'OOH',           budget:1400, impr:12000000, clicks:0,      trx:1200,  revenue:840000000,   ctr:0,    cpc:0,     cvr:0,    cpa:1166667, decay:0.75, K:800,  alpha:1.2 },
-  { name:'CRM Push',      budget:250,  impr:4500000,  clicks:180000, trx:7800,  revenue:7410000000,  ctr:4.0,  cpc:1389,  cvr:4.33, cpa:32051,   decay:0.15, K:400,  alpha:2.2 },
-  { name:'Influencer/KOL',budget:1450, impr:18000000, clicks:360000, trx:4400,  revenue:3388000000,  ctr:2.0,  cpc:4028,  cvr:1.22, cpa:329545,  decay:0.45, K:1400, alpha:1.4 },
+// ═══════════════════════════════════════════════════════════
+// DEFAULT DATA
+// ═══════════════════════════════════════════════════════════
+const DEFAULT_CHANNELS = [
+  { name:'Google Ads',     budget:3200,  impr:42000000, reach:28000000, clicks:840000,  trx:22000, revenue:18480000000, decay:0.40, K:2800, alpha:2.0 },
+  { name:'Meta Ads',       budget:2400,  impr:56000000, reach:38000000, clicks:672000,  trx:15400, revenue:12166000000, decay:0.35, K:2200, alpha:1.8 },
+  { name:'TikTok Ads',     budget:1100,  impr:38000000, reach:25000000, clicks:380000,  trx:6200,  revenue:4092000000,  decay:0.25, K:1800, alpha:1.5 },
+  { name:'YouTube',        budget:1800,  impr:29000000, reach:22000000, clicks:290000,  trx:5800,  revenue:5220000000,  decay:0.60, K:1600, alpha:1.6 },
+  { name:'Programmatic',   budget:900,   impr:74000000, reach:50000000, clicks:222000,  trx:2600,  revenue:1638000000,  decay:0.20, K:1200, alpha:1.3 },
+  { name:'OOH',            budget:1400,  impr:12000000, reach:10000000, clicks:0,       trx:1200,  revenue:840000000,   decay:0.75, K:800,  alpha:1.2 },
+  { name:'CRM Push',       budget:250,   impr:4500000,  reach:4500000,  clicks:180000,  trx:7800,  revenue:7410000000,  decay:0.15, K:400,  alpha:2.2 },
+  { name:'Influencer/KOL', budget:1450,  impr:18000000, reach:14000000, clicks:360000,  trx:4400,  revenue:3388000000,  decay:0.45, K:1400, alpha:1.4 },
 ];
 
-const COLORS = ['#378ADD','#D4537E','#B56ADB','#1D9E75','#E24B4A','#BA7517','#639922','#533AB7'];
-const LABELS = CHANNELS.map(c => c.name);
+const DEFAULT_CI = {
+  name:'Telkomsel Brand Campaign Q2 2025', brand:'Telkomsel — IndiHome Plus',
+  period:'Apr–Jun 2025', nextbudget:14000
+};
 
-// ═══════════════════════════════════════════════════════════════
+// Live data (starts as copy of default, mutated by user input)
+let CHANNELS = JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+let CI = { ...DEFAULT_CI };
+
+const COLORS = ['#378ADD','#D4537E','#B56ADB','#1D9E75','#E24B4A','#BA7517','#639922','#533AB7','#E07B39','#2DC0C0'];
+
+// ═══════════════════════════════════════════════════════════
 // HELPERS
-// ═══════════════════════════════════════════════════════════════
-function fmt(n, dec=0) { return n.toLocaleString('id-ID', { maximumFractionDigits: dec }); }
-function fmtB(n) { return n >= 1e12 ? 'Rp '+(n/1e12).toFixed(2)+'T' : 'Rp '+(n/1e9).toFixed(1)+'B'; }
-function hill(x, K, alpha) { return Math.pow(x, alpha) / (Math.pow(K, alpha) + Math.pow(x, alpha)); }
-function marginalHill(x, K, alpha, dx=10) { return (hill(x+dx,K,alpha) - hill(x,K,alpha)) / dx; }
-function adstockTransform(arr, decay) {
-  const out = [...arr];
-  for (let i = 1; i < out.length; i++) out[i] = arr[i] + decay * out[i-1];
-  return out;
-}
+// ═══════════════════════════════════════════════════════════
+function fmt(n, dec=0) { return (isNaN(n)||!isFinite(n)) ? '—' : n.toLocaleString('id-ID',{maximumFractionDigits:dec}); }
+function fmtB(n) { if(isNaN(n)||!isFinite(n)) return '—'; return n>=1e12 ? 'Rp '+(n/1e12).toFixed(2)+'T' : 'Rp '+(n/1e9).toFixed(1)+'B'; }
+function safe(n,fallback=0) { return isNaN(n)||!isFinite(n) ? fallback : n; }
+function hill(x,K,alpha) { if(K<=0||x<=0) return 0; return Math.pow(x,alpha)/(Math.pow(K,alpha)+Math.pow(x,alpha)); }
+function marginalHill(x,K,alpha,dx=10) { return (hill(x+dx,K,alpha)-hill(x,K,alpha))/dx; }
+function adstockTransform(arr,decay) { const out=[...arr]; for(let i=1;i<out.length;i++) out[i]=arr[i]+decay*out[i-1]; return out; }
+function colorFor(i) { return COLORS[i % COLORS.length]; }
 
-// Chart registry
-const charts = {};
-function dc(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+const charts={};
+function dc(id){ if(charts[id]){charts[id].destroy();delete charts[id];} }
 
-// ═══════════════════════════════════════════════════════════════
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+
+// ═══════════════════════════════════════════════════════════
 // SCORING
-// ═══════════════════════════════════════════════════════════════
-function computeScores() {
-  const maxROAS = Math.max(...CHANNELS.map(c => c.revenue / (c.budget * 1e6)));
-  const minCPA  = Math.min(...CHANNELS.filter(c => c.cpa > 0).map(c => c.cpa));
-  const maxCTR  = Math.max(...CHANNELS.map(c => c.ctr));
-  const maxCVR  = Math.max(...CHANNELS.map(c => c.cvr));
-  const totalTrx = CHANNELS.reduce((s, c) => s + c.trx, 0);
+// ═══════════════════════════════════════════════════════════
+function computeScores(channels) {
+  const maxROAS = Math.max(...channels.map(c => c.budget>0 ? c.revenue/(c.budget*1e6) : 0));
+  const validCPA = channels.filter(c=>c.clicks>0&&c.trx>0).map(c=>c.budget*1e6/c.trx);
+  const minCPA = validCPA.length ? Math.min(...validCPA) : 1;
+  const maxCTR = Math.max(...channels.map(c=>c.impr>0?c.clicks/c.impr*100:0));
+  const maxCVR = Math.max(...channels.map(c=>c.clicks>0?c.trx/c.clicks*100:0));
+  const totalTrx = channels.reduce((s,c)=>s+c.trx,0);
 
-  return CHANNELS.map(c => {
-    const roas     = c.revenue / (c.budget * 1e6);
-    const roasNorm = roas / maxROAS;
-    const cpaEff   = c.cpa > 0 ? minCPA / c.cpa : 1;
-    const ctrNorm  = maxCTR > 0 ? c.ctr / maxCTR : 0;
-    const cvrNorm  = maxCVR > 0 ? c.cvr / maxCVR : 0;
-    const trxShare = c.trx / totalTrx;
-    const score    = Math.min(Math.round(
-      roasNorm * 35 + cpaEff * 25 + ctrNorm * 15 + cvrNorm * 15 + (trxShare / 0.10) * 10
-    ), 99);
-    let action = 'maintain';
-    if (score >= 70)              action = 'scale';
-    else if (score >= 50)         action = 'maintain';
-    else if (c.ctr > 1.5 && c.cvr < 1.5) action = 'optimize';
-    else if (score < 35)          action = 'reduce';
-    if (c.budget <= 300)          action = 'test';
-    return { ...c, roas: parseFloat(roas.toFixed(2)), score, action };
+  return channels.map((c,i)=>{
+    const roas = c.budget>0 ? c.revenue/(c.budget*1e6) : 0;
+    const ctr  = c.impr>0 ? c.clicks/c.impr*100 : 0;
+    const cvr  = c.clicks>0 ? c.trx/c.clicks*100 : 0;
+    const cpa  = c.trx>0 ? c.budget*1e6/c.trx : 0;
+    const cpc  = c.clicks>0 ? c.budget*1e6/c.clicks : 0;
+
+    const roasNorm = maxROAS>0 ? roas/maxROAS : 0;
+    const cpaEff   = cpa>0 && minCPA>0 ? Math.min(minCPA/cpa,1) : (c.trx>0?1:0);
+    const ctrNorm  = maxCTR>0 ? ctr/maxCTR : 0;
+    const cvrNorm  = maxCVR>0 ? cvr/maxCVR : 0;
+    const trxShare = totalTrx>0 ? c.trx/totalTrx : 0;
+
+    const score = Math.min(Math.round(roasNorm*35 + cpaEff*25 + ctrNorm*15 + cvrNorm*15 + (trxShare/0.10)*10), 99);
+    let action='maintain';
+    if(score>=70) action='scale';
+    else if(score>=50) action='maintain';
+    else if(ctr>1.5&&cvr<1.5) action='optimize';
+    else if(score<35) action='reduce';
+    if(c.budget<=300) action='test';
+
+    return { ...c, roas:parseFloat(safe(roas).toFixed(2)), ctr:parseFloat(safe(ctr).toFixed(2)), cvr:parseFloat(safe(cvr).toFixed(2)), cpa:safe(cpa), cpc:safe(cpc), score, action, color:colorFor(i) };
   });
 }
 
-// ═══════════════════════════════════════════════════════════════
-// OPTIMIZER
-// ═══════════════════════════════════════════════════════════════
-function computeOptimizer(totalBudget) {
-  const scored = computeScores();
-  const totalPrev = scored.reduce((s, c) => s + c.budget, 0);
-  let weights = scored.map(c => {
-    if (c.action === 'scale')    return (c.budget / totalPrev) * 1.40;
-    if (c.action === 'reduce')   return (c.budget / totalPrev) * 0.50;
-    if (c.action === 'test')     return (c.budget / totalPrev) * 1.20;
-    if (c.action === 'optimize') return (c.budget / totalPrev) * 0.85;
-    return c.budget / totalPrev;
-  });
-  const wSum = weights.reduce((a, b) => a + b, 0);
-  const recs = weights.map(w => Math.round(w / wSum * totalBudget));
-  const diff = totalBudget - recs.reduce((a, b) => a + b, 0);
-  recs[0] += diff;
-  return scored.map((c, i) => ({ ...c, recommended: recs[i] }));
+// ═══════════════════════════════════════════════════════════
+// INPUT TABLE — BUILD & READ
+// ═══════════════════════════════════════════════════════════
+function buildInputTable() {
+  const tbody = document.getElementById('ch-tbody');
+  tbody.innerHTML = '';
+  CHANNELS.forEach((ch, i) => addRowToTable(ch, i));
 }
 
-// ═══════════════════════════════════════════════════════════════
-// RENDER: DASHBOARD
-// ═══════════════════════════════════════════════════════════════
+function addRowToTable(ch, i) {
+  const tbody = document.getElementById('ch-tbody');
+  const ctr  = ch.impr>0 ? (ch.clicks/ch.impr*100).toFixed(2) : '0.00';
+  const cpc  = ch.clicks>0 ? Math.round(ch.budget*1e6/ch.clicks) : 0;
+  const cvr  = ch.clicks>0 ? (ch.trx/ch.clicks*100).toFixed(2) : '0.00';
+  const cpa  = ch.trx>0 ? Math.round(ch.budget*1e6/ch.trx) : 0;
+  const roas = ch.budget>0 ? (ch.revenue/(ch.budget*1e6)).toFixed(2) : '0.00';
+  const color = colorFor(i);
+
+  const tr = document.createElement('tr');
+  tr.dataset.idx = i;
+  tr.innerHTML = `
+    <td class="col-channel">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div style="width:10px;height:10px;border-radius:2px;background:${color};flex-shrink:0;"></div>
+        <input class="inp-ch-name" type="text" value="${ch.name}" onchange="updateRowName(${i},this.value)">
+      </div>
+    </td>
+    <td><input class="inp-num" type="number" min="0" value="${ch.budget}" oninput="updateCell(${i},'budget',this.value)"></td>
+    <td><input class="inp-num w-lg" type="number" min="0" value="${ch.impr}" oninput="updateCell(${i},'impr',this.value)"></td>
+    <td><input class="inp-num w-lg" type="number" min="0" value="${ch.reach}" oninput="updateCell(${i},'reach',this.value)"></td>
+    <td><input class="inp-num" type="number" min="0" value="${ch.clicks}" oninput="updateCell(${i},'clicks',this.value)"></td>
+    <td><span class="cell-computed" id="auto-ctr-${i}">${ctr}%</span></td>
+    <td><span class="cell-computed" id="auto-cpc-${i}">${fmt(cpc)}</span></td>
+    <td><input class="inp-num" type="number" min="0" value="${ch.trx}" oninput="updateCell(${i},'trx',this.value)"></td>
+    <td><input class="inp-num w-lg" type="number" min="0" value="${ch.revenue}" oninput="updateCell(${i},'revenue',this.value)"></td>
+    <td><span class="cell-computed" id="auto-cpa-${i}">${fmt(cpa)}</span></td>
+    <td><span class="cell-computed" id="auto-roas-${i}">${roas}x</span></td>
+    <td><input class="inp-num w-sm" type="number" min="0" max="0.99" step="0.05" value="${ch.decay}" oninput="updateCell(${i},'decay',this.value)"></td>
+    <td><input class="inp-num" type="number" min="0" value="${ch.K}" oninput="updateCell(${i},'K',this.value)"></td>
+    <td><input class="inp-num w-sm" type="number" min="0.1" max="5" step="0.1" value="${ch.alpha}" oninput="updateCell(${i},'alpha',this.value)"></td>
+    <td><button class="btn-del-ch" onclick="deleteChannel(${i})" title="Hapus channel">×</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function updateRowName(i, val) { if(CHANNELS[i]) CHANNELS[i].name = val; }
+
+function updateCell(i, field, val) {
+  if(!CHANNELS[i]) return;
+  CHANNELS[i][field] = parseFloat(val) || 0;
+  // Recompute auto fields for this row
+  const ch = CHANNELS[i];
+  const ctr  = ch.impr>0 ? (ch.clicks/ch.impr*100).toFixed(2) : '0.00';
+  const cpc  = ch.clicks>0 ? Math.round(ch.budget*1e6/ch.clicks) : 0;
+  const cpa  = ch.trx>0 ? Math.round(ch.budget*1e6/ch.trx) : 0;
+  const roas = ch.budget>0 ? (ch.revenue/(ch.budget*1e6)).toFixed(2) : '0.00';
+  const el = (id) => document.getElementById(id);
+  if(el(`auto-ctr-${i}`))  el(`auto-ctr-${i}`).textContent  = ctr+'%';
+  if(el(`auto-cpc-${i}`))  el(`auto-cpc-${i}`).textContent  = fmt(cpc);
+  if(el(`auto-cpa-${i}`))  el(`auto-cpa-${i}`).textContent  = fmt(cpa);
+  if(el(`auto-roas-${i}`)) el(`auto-roas-${i}`).textContent = roas+'x';
+}
+
+function addChannel() {
+  CHANNELS.push({ name:`Channel ${CHANNELS.length+1}`, budget:500, impr:5000000, reach:3000000, clicks:50000, trx:1000, revenue:500000000, decay:0.30, K:1000, alpha:1.5 });
+  const i = CHANNELS.length-1;
+  addRowToTable(CHANNELS[i], i);
+}
+
+function deleteChannel(i) {
+  if(CHANNELS.length <= 1) { showToast('Minimal 1 channel harus ada.'); return; }
+  CHANNELS.splice(i, 1);
+  buildInputTable();
+}
+
+function readCampaignInfo() {
+  CI.name       = document.getElementById('ci-name')?.value || CI.name;
+  CI.brand      = document.getElementById('ci-brand')?.value || CI.brand;
+  CI.period     = document.getElementById('ci-period')?.value || CI.period;
+  CI.nextbudget = parseFloat(document.getElementById('ci-nextbudget')?.value) || 14000;
+}
+
+function resetToDefault() {
+  CHANNELS = JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
+  CI = { ...DEFAULT_CI };
+  document.getElementById('ci-name').value = CI.name;
+  document.getElementById('ci-brand').value = CI.brand;
+  document.getElementById('ci-period').value = CI.period;
+  document.getElementById('ci-nextbudget').value = CI.nextbudget;
+  buildInputTable();
+  showToast('Data direset ke default sample.');
+}
+
+function applyAndAnalyze() {
+  readCampaignInfo();
+  document.getElementById('header-campaign-label').textContent = CI.name + ' · ' + CI.period;
+  refreshAllPanels();
+  showMain('dashboard', document.querySelectorAll('.main-nav-btn')[1]);
+  showToast('✓ Data applied — dashboard updated!');
+}
+
+// ═══════════════════════════════════════════════════════════
+// REFRESH ALL
+// ═══════════════════════════════════════════════════════════
+function refreshAllPanels() {
+  renderDashboard();
+  renderChannels();
+  renderOptimizer();
+  buildAdstockTabs();
+  buildSatTabs();
+  renderCombined();
+  // Reset scenario chart
+  selectScenario('conservative', document.querySelector('.s-tab'));
+  renderScenarioChart();
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
 function renderDashboard() {
-  const scored = computeScores();
-  const totalBudget = scored.reduce((s, c) => s + c.budget, 0);
-  const totalRev    = scored.reduce((s, c) => s + c.revenue, 0);
-  const totalTrx    = scored.reduce((s, c) => s + c.trx, 0);
-  const totalImpr   = scored.reduce((s, c) => s + c.impr, 0);
-  const totalClicks = scored.reduce((s, c) => s + c.clicks, 0);
-  const overallROAS = totalRev / (totalBudget * 1e6);
-  const overallCTR  = totalClicks / totalImpr * 100;
-  const overallCVR  = totalTrx / totalClicks * 100;
-  const overallCPA  = totalBudget * 1e6 / totalTrx;
+  const scored = computeScores(CHANNELS);
+  const totalBudget = scored.reduce((s,c)=>s+c.budget,0);
+  const totalRev    = scored.reduce((s,c)=>s+c.revenue,0);
+  const totalTrx    = scored.reduce((s,c)=>s+c.trx,0);
+  const totalImpr   = scored.reduce((s,c)=>s+c.impr,0);
+  const totalClicks = scored.reduce((s,c)=>s+c.clicks,0);
+  const overallROAS = totalBudget>0 ? totalRev/(totalBudget*1e6) : 0;
+  const overallCTR  = totalImpr>0 ? totalClicks/totalImpr*100 : 0;
+  const overallCVR  = totalClicks>0 ? totalTrx/totalClicks*100 : 0;
+  const overallCPA  = totalTrx>0 ? totalBudget*1e6/totalTrx : 0;
 
-  document.getElementById('kpi-budget').textContent  = 'Rp ' + fmt(totalBudget) + 'Jt';
+  document.getElementById('kpi-budget').textContent  = 'Rp '+fmt(totalBudget)+'Jt';
   document.getElementById('kpi-revenue').textContent = fmtB(totalRev);
-  document.getElementById('kpi-roas').textContent    = overallROAS.toFixed(2) + 'x';
+  document.getElementById('kpi-roas').textContent    = safe(overallROAS).toFixed(2)+'x';
   document.getElementById('kpi-trx').textContent     = fmt(totalTrx);
-  document.getElementById('kpi-impr').textContent    = fmt(Math.round(totalImpr / 1e6)) + 'M';
-  document.getElementById('kpi-cvr').textContent     = overallCVR.toFixed(2) + '%';
-  document.getElementById('kpi-ctr').textContent     = overallCTR.toFixed(2) + '%';
-  document.getElementById('kpi-cpa').textContent     = 'Rp ' + fmt(Math.round(overallCPA));
+  document.getElementById('kpi-impr').textContent    = fmt(Math.round(totalImpr/1e6))+'M';
+  document.getElementById('kpi-cvr').textContent     = safe(overallCVR).toFixed(2)+'%';
+  document.getElementById('kpi-ctr').textContent     = safe(overallCTR).toFixed(2)+'%';
+  document.getElementById('kpi-cpa').textContent     = 'Rp '+fmt(Math.round(safe(overallCPA)));
 
-  const best  = [...scored].sort((a, b) => b.score - a.score)[0];
-  const worst = [...scored].sort((a, b) => a.score - b.score)[0];
-  document.getElementById('best-channel').textContent = best.name;
-  document.getElementById('best-detail').textContent  = 'ROAS ' + best.roas.toFixed(2) + 'x · Score ' + best.score;
+  const best  = [...scored].sort((a,b)=>b.score-a.score)[0];
+  const worst = [...scored].sort((a,b)=>a.score-b.score)[0];
+  document.getElementById('best-channel').textContent  = best.name;
+  document.getElementById('best-detail').textContent   = 'ROAS '+best.roas.toFixed(2)+'x · Score '+best.score;
   document.getElementById('worst-channel').textContent = worst.name;
-  document.getElementById('worst-detail').textContent  = 'ROAS ' + worst.roas.toFixed(2) + 'x · Score ' + worst.score;
+  document.getElementById('worst-detail').textContent  = 'ROAS '+worst.roas.toFixed(2)+'x · Score '+worst.score;
 
   // Budget doughnut
   dc('chartBudget');
-  document.getElementById('legend-budget').innerHTML = CHANNELS.map((c, i) =>
-    `<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:${COLORS[i]};display:inline-block;"></span>${c.name.split(' ')[0]}</span>`
+  document.getElementById('legend-budget').innerHTML = scored.map((c,i)=>
+    `<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:${c.color};display:inline-block;"></span>${c.name.split(' ')[0]}</span>`
   ).join('');
-  charts['chartBudget'] = new Chart(document.getElementById('chartBudget'), {
-    type: 'doughnut',
-    data: { labels: LABELS, datasets: [{ data: CHANNELS.map(c => c.budget), backgroundColor: COLORS, borderWidth: 2, borderColor: '#fff' }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.label}: Rp ${fmt(ctx.raw)}Jt` } } } }
+  charts['chartBudget'] = new Chart(document.getElementById('chartBudget'),{
+    type:'doughnut',
+    data:{labels:scored.map(c=>c.name),datasets:[{data:scored.map(c=>c.budget),backgroundColor:scored.map(c=>c.color),borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: Rp ${fmt(ctx.raw)}Jt`}}}}
   });
 
-  // ROAS bar
   dc('chartROAS');
-  charts['chartROAS'] = new Chart(document.getElementById('chartROAS'), {
-    type: 'bar',
-    data: { labels: LABELS, datasets: [{ data: scored.map(c => parseFloat(c.roas.toFixed(2))), backgroundColor: COLORS, borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'ROAS: ' + ctx.raw + 'x' } } }, scales: { x: { ticks: { font: { size: 10 }, maxRotation: 30 } }, y: { ticks: { font: { size: 10 } } } } }
+  charts['chartROAS'] = new Chart(document.getElementById('chartROAS'),{
+    type:'bar',
+    data:{labels:scored.map(c=>c.name),datasets:[{data:scored.map(c=>c.roas),backgroundColor:scored.map(c=>c.color),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'ROAS: '+ctx.raw+'x'}}},scales:{x:{ticks:{font:{size:10},maxRotation:30}},y:{ticks:{font:{size:10}}}}}
   });
 
-  // Transactions horizontal bar
   dc('chartTrx');
-  charts['chartTrx'] = new Chart(document.getElementById('chartTrx'), {
-    type: 'bar',
-    data: { labels: LABELS, datasets: [{ data: scored.map(c => c.trx), backgroundColor: COLORS, borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 } } }, y: { ticks: { font: { size: 10 } } } } }
+  charts['chartTrx'] = new Chart(document.getElementById('chartTrx'),{
+    type:'bar',
+    data:{labels:scored.map(c=>c.name),datasets:[{data:scored.map(c=>c.trx),backgroundColor:scored.map(c=>c.color),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}}
   });
 
-  // Score bars
-  document.getElementById('score-bars').innerHTML = [...scored].sort((a, b) => b.score - a.score).map(c =>
+  document.getElementById('score-bars').innerHTML = [...scored].sort((a,b)=>b.score-a.score).map(c=>
     `<div class="score-row">
-      <div class="score-name">${c.name.replace(' Ads','').replace('/KOL','')}</div>
+      <div class="score-name" style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:2px;background:${c.color};display:inline-block;"></span>${c.name.replace(' Ads','').replace('/KOL','')}</div>
       <div class="score-track"><div class="score-bar" style="width:${c.score}%;background:${c.score>=70?'#639922':c.score>=50?'#BA7517':'#E24B4A'};"></div></div>
       <div class="score-val">${c.score}</div>
     </div>`
   ).join('');
 
-  // Insights
-  const g = CHANNELS.find(c=>c.name==='Google Ads'), crm = CHANNELS.find(c=>c.name==='CRM Push');
-  document.getElementById('insight-list').innerHTML = [
-    { type:'ins-scale',  text:`<strong>Scale Google Ads & CRM Push</strong> — highest ROAS (${(g.revenue/(g.budget*1e6)).toFixed(1)}x & ${(crm.revenue/(crm.budget*1e6)).toFixed(1)}x) with strong transaction contribution. Increase budget by 20–30%.` },
-    { type:'ins-reduce', text:`<strong>Reduce Programmatic & OOH</strong> — lowest efficiency scores. Programmatic CPA exceeds Rp 346K vs category benchmark Rp 175K. OOH lacks conversion tracking.` },
-    { type:'ins-warn',   text:`<strong>Optimize TikTok & Influencer/KOL</strong> — strong reach and CTR but conversion rates below 2%. Improve landing page UX and audience targeting.` },
-    { type:'ins-info',   text:`<strong>Budget reallocation signal:</strong> Shifting Rp 350Jt from OOH to Google Ads (near saturation 68%) estimated to generate +Rp 1.2B incremental revenue based on marginal return curves.` },
-  ].map(i => `<div class="insight-item ${i.type}">${i.text}</div>`).join('');
+  // Dynamic insights
+  const topScale  = [...scored].filter(c=>c.action==='scale').sort((a,b)=>b.score-a.score).slice(0,2).map(c=>c.name).join(' & ') || scored[0].name;
+  const topReduce = [...scored].filter(c=>c.action==='reduce').sort((a,b)=>a.score-b.score).slice(0,2).map(c=>c.name).join(' & ');
+  const topOpt    = [...scored].filter(c=>c.action==='optimize').map(c=>c.name).join(' & ');
+  const topTest   = [...scored].filter(c=>c.action==='test').map(c=>c.name).join(' & ');
+  const insights = [
+    { type:'ins-scale',  text:`<strong>Scale: ${topScale}</strong> — highest efficiency score(s) berdasarkan ROAS, CPA, dan transaction contribution. Prioritaskan dalam alokasi budget next campaign.` },
+    topReduce ? { type:'ins-reduce', text:`<strong>Reduce: ${topReduce}</strong> — efficiency score rendah, CPA di atas benchmark. Pertimbangkan realokasi budget ke channel dengan performa lebih tinggi.` } : null,
+    topOpt ? { type:'ins-warn', text:`<strong>Optimize: ${topOpt}</strong> — CTR baik tapi CVR lemah. Perbaiki landing page, audience targeting, dan creative-to-conversion alignment.` } : null,
+    topTest ? { type:'ins-info', text:`<strong>Test: ${topTest}</strong> — budget kecil, sinyal awal menjanjikan. Tingkatkan budget secara bertahap sambil monitor CPA dan CVR.` } : null,
+  ].filter(Boolean);
+  document.getElementById('insight-list').innerHTML = insights.map(i=>`<div class="insight-item ${i.type}">${i.text}</div>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════
-// RENDER: CHANNELS
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// CHANNELS
+// ═══════════════════════════════════════════════════════════
 function renderChannels() {
-  const scored = computeScores();
-  const totalBudget = scored.reduce((s, c) => s + c.budget, 0);
-  document.getElementById('channel-tbody').innerHTML = scored.map(c =>
+  const scored = computeScores(CHANNELS);
+  const totalBudget = scored.reduce((s,c)=>s+c.budget,0);
+  document.getElementById('channel-tbody').innerHTML = scored.map(c=>
     `<tr>
-      <td><strong>${c.name}</strong></td>
+      <td><strong style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:${c.color};display:inline-block;"></span>${c.name}</strong></td>
       <td>Rp ${fmt(c.budget)}Jt</td>
       <td>${((c.budget/totalBudget)*100).toFixed(1)}%</td>
       <td>${fmt(Math.round(c.impr/1e6))}M</td>
       <td>${fmt(Math.round(c.clicks/1000))}K</td>
       <td>${c.ctr.toFixed(1)}%</td>
-      <td>${c.cpc>0?'Rp '+fmt(c.cpc):'—'}</td>
+      <td>${c.cpc>0?'Rp '+fmt(Math.round(c.cpc)):'—'}</td>
       <td>${fmt(c.trx)}</td>
-      <td>Rp ${fmt(Math.round(c.cpa))}</td>
+      <td>${c.cpa>0?'Rp '+fmt(Math.round(c.cpa)):'—'}</td>
       <td>${fmtB(c.revenue)}</td>
       <td>${c.roas.toFixed(2)}x</td>
       <td>${c.score}</td>
@@ -879,370 +903,400 @@ function renderChannels() {
   ).join('');
 
   dc('chartBvR');
-  charts['chartBvR'] = new Chart(document.getElementById('chartBvR'), {
-    type: 'bar',
-    data: { labels: LABELS, datasets: [
-      { label: 'Budget (Rp Jt)', data: CHANNELS.map(c => c.budget), backgroundColor: COLORS.map(c => c+'88'), borderRadius: 3 },
-      { label: 'Revenue (Rp B)', data: CHANNELS.map(c => parseFloat((c.revenue/1e9).toFixed(1))), backgroundColor: COLORS, borderRadius: 3 }
+  charts['chartBvR'] = new Chart(document.getElementById('chartBvR'),{
+    type:'bar',
+    data:{labels:scored.map(c=>c.name),datasets:[
+      {label:'Budget (Rp Jt)',data:scored.map(c=>c.budget),backgroundColor:scored.map(c=>c.color+'88'),borderRadius:3},
+      {label:'Revenue (Rp B)',data:scored.map(c=>parseFloat((c.revenue/1e9).toFixed(1))),backgroundColor:scored.map(c=>c.color),borderRadius:3}
     ]},
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{ticks:{font:{size:10},maxRotation:30}},y:{ticks:{font:{size:10}}}} }
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{ticks:{font:{size:10},maxRotation:30}},y:{ticks:{font:{size:10}}}}}
   });
 
+  const cpaData = scored.filter(c=>c.cpa>0&&c.cpa<2000000);
   dc('chartCPA');
-  const cpaData = scored.filter(c => c.cpa < 1500000);
-  charts['chartCPA'] = new Chart(document.getElementById('chartCPA'), {
-    type: 'bar',
-    data: { labels: cpaData.map(c => c.name), datasets: [{ data: cpaData.map(c => Math.round(c.cpa)), backgroundColor: cpaData.map(c => c.cpa<175000?'#639922':c.cpa<300000?'#BA7517':'#E24B4A'), borderRadius: 4 }] },
-    options: { responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>'Rp '+fmt(ctx.raw)}}}, scales:{x:{ticks:{font:{size:10},callback:v=>'Rp '+fmt(v)}},y:{ticks:{font:{size:10}}}} }
+  charts['chartCPA'] = new Chart(document.getElementById('chartCPA'),{
+    type:'bar',
+    data:{labels:cpaData.map(c=>c.name),datasets:[{data:cpaData.map(c=>Math.round(c.cpa)),backgroundColor:cpaData.map(c=>c.cpa<175000?'#639922':c.cpa<350000?'#BA7517':'#E24B4A'),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'Rp '+fmt(ctx.raw)}}},scales:{x:{ticks:{font:{size:10},callback:v=>'Rp '+fmt(v)}},y:{ticks:{font:{size:10}}}}}
   });
 }
 
-// ═══════════════════════════════════════════════════════════════
-// RENDER: OPTIMIZER
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// OPTIMIZER
+// ═══════════════════════════════════════════════════════════
 function renderOptimizer() {
-  const nextBudget = parseInt(document.getElementById('inp-nextbudget')?.value || 14000);
-  const data = computeOptimizer(nextBudget);
-  const totalPrev = data.reduce((s, c) => s + c.budget, 0);
-  const totalRec  = data.reduce((s, c) => s + c.recommended, 0);
+  const nextBudget = CI.nextbudget || 14000;
+  const scored = computeScores(CHANNELS);
+  const totalPrev = scored.reduce((s,c)=>s+c.budget,0);
+  const weights = scored.map(c=>{
+    if(c.action==='scale')    return (c.budget/totalPrev)*1.40;
+    if(c.action==='reduce')   return (c.budget/totalPrev)*0.50;
+    if(c.action==='test')     return (c.budget/totalPrev)*1.20;
+    if(c.action==='optimize') return (c.budget/totalPrev)*0.85;
+    return c.budget/totalPrev;
+  });
+  const wSum = weights.reduce((a,b)=>a+b,0);
+  const recs = weights.map(w=>Math.round(w/wSum*nextBudget));
+  const diff = nextBudget - recs.reduce((a,b)=>a+b,0);
+  if(recs.length) recs[0]+=diff;
+  const totalRec = recs.reduce((a,b)=>a+b,0);
 
-  document.getElementById('opt-grid').innerHTML = data.map((c, i) => {
-    const pct   = Math.round(c.recommended / totalRec * 100);
-    const delta = c.recommended - c.budget;
-    const cls   = delta > 0 ? 'delta-up' : delta < 0 ? 'delta-down' : 'delta-same';
-    const dStr  = (delta > 0 ? '+' : '') + fmt(delta) + 'Jt';
+  document.getElementById('opt-total-budget').textContent = 'Rp '+fmt(nextBudget)+'Jt';
+  document.getElementById('opt-grid').innerHTML = scored.map((c,i)=>{
+    const pct   = Math.round(recs[i]/totalRec*100);
+    const delta = recs[i]-c.budget;
+    const cls   = delta>0?'delta-up':delta<0?'delta-down':'delta-same';
+    const dStr  = (delta>0?'+':'')+fmt(delta)+'Jt';
     return `<div class="opt-channel">
-      <div class="opt-name">${c.name}</div>
+      <div class="opt-name" style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:2px;background:${c.color};display:inline-block;"></span>${c.name}</div>
       <div class="opt-curr">Current: Rp ${fmt(c.budget)}Jt</div>
-      <div class="opt-rec">Rp ${fmt(c.recommended)}Jt</div>
+      <div class="opt-rec">Rp ${fmt(recs[i])}Jt</div>
       <div class="opt-delta ${cls}">${dStr} · ${pct}%</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${COLORS[i]};"></div></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.color};"></div></div>
     </div>`;
   }).join('');
 
-  const prevTrx  = CHANNELS.reduce((s, c) => s + c.trx, 0);
-  const prevRev  = CHANNELS.reduce((s, c) => s + c.revenue, 0);
-  const prevROAS = prevRev / (totalPrev * 1e6);
-  const prevCPA  = totalPrev * 1e6 / prevTrx;
-  const liftTrx  = 0.14, liftRev = 0.17;
-  const projTrx  = Math.round(prevTrx * (1 + liftTrx));
-  const projRev  = prevRev * (1 + liftRev);
-  const projROAS = projRev / (nextBudget * 1e6);
-  const projCPA  = nextBudget * 1e6 / projTrx;
+  const prevTrx  = scored.reduce((s,c)=>s+c.trx,0);
+  const prevRev  = scored.reduce((s,c)=>s+c.revenue,0);
+  const prevROAS = prevRev/(totalPrev*1e6);
+  const prevCPA  = prevTrx>0 ? totalPrev*1e6/prevTrx : 0;
+  const liftTrx=0.14, liftRev=0.17;
+  const projTrx  = Math.round(prevTrx*(1+liftTrx));
+  const projRev  = prevRev*(1+liftRev);
+  const projROAS = projRev/(nextBudget*1e6);
+  const projCPA  = projTrx>0 ? nextBudget*1e6/projTrx : 0;
 
   document.getElementById('proj-trx').textContent   = fmt(projTrx);
   document.getElementById('proj-rev').textContent   = fmtB(projRev);
-  document.getElementById('proj-roas').textContent  = projROAS.toFixed(2) + 'x';
-  document.getElementById('proj-cpa').textContent   = 'Rp ' + fmt(Math.round(projCPA));
-  document.getElementById('proj-trx-d').textContent = '+' + (liftTrx*100).toFixed(0) + '% vs prev';
-  document.getElementById('proj-rev-d').textContent = '+' + (liftRev*100).toFixed(0) + '% vs prev';
-  document.getElementById('proj-roas-d').textContent = (projROAS >= prevROAS ? '↑' : '↓') + ' ' + Math.abs(projROAS - prevROAS).toFixed(2) + 'x';
-  document.getElementById('proj-cpa-d').textContent = (projCPA <= prevCPA ? '↓' : '+') + 'Rp ' + fmt(Math.abs(Math.round(projCPA - prevCPA)));
+  document.getElementById('proj-roas').textContent  = safe(projROAS).toFixed(2)+'x';
+  document.getElementById('proj-cpa').textContent   = 'Rp '+fmt(Math.round(safe(projCPA)));
+  document.getElementById('proj-trx-d').textContent = '+'+Math.round(liftTrx*100)+'% vs prev';
+  document.getElementById('proj-rev-d').textContent = '+'+Math.round(liftRev*100)+'% vs prev';
+  document.getElementById('proj-roas-d').textContent= (projROAS>=prevROAS?'↑ ':'↓ ')+Math.abs(projROAS-prevROAS).toFixed(2)+'x';
+  document.getElementById('proj-cpa-d').textContent = (projCPA<=prevCPA?'↓ ':'+')+'Rp '+fmt(Math.abs(Math.round(projCPA-prevCPA)));
 
-  document.getElementById('opt-reasoning').innerHTML = `
-    <strong>Google Ads (+Rp 640Jt):</strong> Highest efficiency score (99), ROAS 5.78x, CPA Rp 145K. Diminishing return not yet reached at current budget. Primary growth lever.<br><br>
-    <strong>CRM Push (+Rp 50Jt):</strong> Most efficient channel — ROAS 29.6x, CPA Rp 32K. Constrained by audience size. Small incremental budget still very high-ROI.<br><br>
-    <strong>TikTok (+Rp 140Jt):</strong> Strong reach, growing CVR. Creative-to-landing optimizations to be budgeted alongside to improve conversion efficiency.<br><br>
-    <strong>Programmatic (−Rp 300Jt):</strong> CPA 2x above acceptable threshold. Budget reallocated to higher-efficiency digital channels.<br><br>
-    <strong>OOH (−Rp 350Jt):</strong> No digital conversion tracking. Contribution estimated via brand lift survey only. Partial budget retained for key OOH moments.
-  `;
+  // Dynamic reasoning
+  const scaleList = scored.filter(c=>c.action==='scale').map(c=>`<strong>${c.name}</strong> (score ${c.score}, ROAS ${c.roas.toFixed(1)}x)`).join(', ');
+  const reduceList = scored.filter(c=>c.action==='reduce').map(c=>`<strong>${c.name}</strong> (score ${c.score})`).join(', ');
+  const optList = scored.filter(c=>c.action==='optimize').map(c=>`<strong>${c.name}</strong>`).join(', ');
+  document.getElementById('opt-reasoning').innerHTML = [
+    scaleList  ? `<strong>↑ Scale:</strong> ${scaleList} — efficiency score tertinggi. Budget ditingkatkan 40% dari proporsi sebelumnya.` : '',
+    reduceList ? `<strong>↓ Reduce:</strong> ${reduceList} — efficiency rendah. Budget dikurangi 50% dari proporsi sebelumnya dan direalokasi ke channel scale.` : '',
+    optList    ? `<strong>→ Optimize:</strong> ${optList} — budget sedikit dikurangi sambil perbaikan creative dan targeting dijalankan.` : '',
+    `<strong>Baseline:</strong> Budget total next campaign Rp ${fmt(nextBudget)}Jt. Lift proyeksi +${Math.round(liftTrx*100)}% transactions berdasarkan efisiensi historis channel scale.`
+  ].filter(Boolean).map(s=>`<p style="margin-bottom:8px;">${s}</p>`).join('');
 
   dc('chartShift');
-  charts['chartShift'] = new Chart(document.getElementById('chartShift'), {
-    type: 'bar',
-    data: { labels: LABELS, datasets: [
-      { label: 'Current', data: data.map(c => c.budget), backgroundColor: '#B4B2A9', borderRadius: 3 },
-      { label: 'Recommended', data: data.map(c => c.recommended), backgroundColor: COLORS, borderRadius: 3 }
+  charts['chartShift'] = new Chart(document.getElementById('chartShift'),{
+    type:'bar',
+    data:{labels:scored.map(c=>c.name),datasets:[
+      {label:'Current',data:scored.map(c=>c.budget),backgroundColor:'#B4B2A9',borderRadius:3},
+      {label:'Recommended',data:recs,backgroundColor:scored.map(c=>c.color),borderRadius:3}
     ]},
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{ticks:{font:{size:10},maxRotation:30}},y:{ticks:{font:{size:10},callback:v=>'Rp '+v+'Jt'}}} }
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{ticks:{font:{size:10},maxRotation:30}},y:{ticks:{font:{size:10},callback:v=>'Rp '+v+'Jt'}}}}
   });
 }
 
-// ═══════════════════════════════════════════════════════════════
-// RENDER: SCENARIOS
-// ═══════════════════════════════════════════════════════════════
-const SCENARIOS = {
-  conservative: { title:'Conservative Scenario', desc:'Lower risk. Protect current ROAS. Prioritize proven channels only. Budget reduced 10%.', budget:11250, trxLift:0.04, revLift:0.06, roas:5.4, alloc:{Google:3400,Meta:2500,TikTok:900,YouTube:1700,Programmatic:600,OOH:1050,CRM:280,Influencer:820} },
-  balanced:     { title:'Balanced Scenario',      desc:'Moderate growth. Reallocate from weak to strong channels. Budget +12% vs current.',    budget:14000, trxLift:0.14, revLift:0.17, roas:5.1, alloc:{Google:3840,Meta:2880,TikTok:1240,YouTube:1800,Programmatic:600,OOH:1050,CRM:300,Influencer:1290} },
-  aggressive:   { title:'Aggressive Growth',      desc:'Max transaction volume. Accept lower ROAS. Heavy digital push. Budget +25% vs current.',budget:15625, trxLift:0.26, revLift:0.20, roas:4.5, alloc:{Google:4500,Meta:3500,TikTok:2000,YouTube:2000,Programmatic:400,OOH:500,CRM:325,Influencer:2400} },
-};
+// ═══════════════════════════════════════════════════════════
+// SCENARIOS
+// ═══════════════════════════════════════════════════════════
+function getScenarios() {
+  const base = CI.nextbudget || 14000;
+  return {
+    conservative:{ title:'Conservative Scenario', desc:'Lower risk. Protect current ROAS. Prioritize proven channels. Budget -10% vs next plan.', budget:Math.round(base*0.8), trxLift:0.04, revLift:0.06, roas:5.4 },
+    balanced:    { title:'Balanced Scenario',      desc:'Moderate growth. Reallocate from weak to strong channels. Budget as planned.', budget:base, trxLift:0.14, revLift:0.17, roas:5.1 },
+    aggressive:  { title:'Aggressive Growth',      desc:'Max transaction volume. Accept lower ROAS. Heavy digital push. Budget +25%.', budget:Math.round(base*1.25), trxLift:0.26, revLift:0.20, roas:4.5 },
+  };
+}
 
 function selectScenario(key, btn) {
-  document.querySelectorAll('.s-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.s-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  const sc = SCENARIOS[key];
-  const prevTrx = CHANNELS.reduce((s, c) => s + c.trx, 0);
-  const prevRev = CHANNELS.reduce((s, c) => s + c.revenue, 0);
-  document.getElementById('scenario-title').textContent = sc.title;
-  document.getElementById('scenario-desc').textContent  = sc.desc;
-  document.getElementById('sc-budget').textContent = 'Rp ' + fmt(sc.budget) + 'Jt';
-  document.getElementById('sc-trx').textContent    = fmt(Math.round(prevTrx*(1+sc.trxLift)));
-  document.getElementById('sc-rev').textContent    = fmtB(prevRev*(1+sc.revLift));
-  document.getElementById('sc-roas').textContent   = sc.roas.toFixed(1) + 'x';
-  document.getElementById('sc-trx-d').textContent  = '+' + (sc.trxLift*100).toFixed(0) + '% vs prev';
-  document.getElementById('sc-rev-d').textContent  = '+' + (sc.revLift*100).toFixed(0) + '% vs prev';
-  document.getElementById('sc-alloc').innerHTML = Object.entries(sc.alloc).map(([ch, amt], i) =>
+  const sc = getScenarios()[key];
+  const scored = computeScores(CHANNELS);
+  const prevTrx = scored.reduce((s,c)=>s+c.trx,0);
+  const prevRev = scored.reduce((s,c)=>s+c.revenue,0);
+  const totalPrev = scored.reduce((s,c)=>s+c.budget,0);
+
+  document.getElementById('sc-title').textContent = sc.title;
+  document.getElementById('sc-desc').textContent  = sc.desc;
+  document.getElementById('sc-budget').textContent= 'Rp '+fmt(sc.budget)+'Jt';
+  document.getElementById('sc-trx').textContent   = fmt(Math.round(prevTrx*(1+sc.trxLift)));
+  document.getElementById('sc-rev').textContent   = fmtB(prevRev*(1+sc.revLift));
+  document.getElementById('sc-roas').textContent  = sc.roas.toFixed(1)+'x';
+  document.getElementById('sc-trx-d').textContent = '+'+Math.round(sc.trxLift*100)+'% vs prev';
+  document.getElementById('sc-rev-d').textContent = '+'+Math.round(sc.revLift*100)+'% vs prev';
+
+  // Dynamic allocation based on scores
+  const wSum = scored.reduce((s,c)=>s+(key==='aggressive'?c.score*1.2:key==='conservative'?c.score*0.8:c.score),0);
+  const alloc = scored.map(c=>{
+    let w = key==='aggressive' ? c.score*1.2 : key==='conservative' ? c.score*0.8 : c.score;
+    if(key==='conservative'&&c.action==='reduce') w*=0.3;
+    if(key==='aggressive'&&c.action==='scale') w*=1.5;
+    return { name:c.name, color:c.color, amt:Math.round(w/wSum*sc.budget) };
+  });
+  const aTotal = alloc.reduce((s,a)=>s+a.amt,0);
+  const aDiff = sc.budget - aTotal;
+  if(alloc.length) alloc[0].amt += aDiff;
+
+  document.getElementById('sc-alloc').innerHTML = alloc.map(a=>
     `<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;">
-      <div style="width:110px;font-size:12px;color:var(--text-secondary);">${ch}</div>
-      <div style="flex:1;height:6px;background:var(--border);border-radius:3px;">
-        <div style="height:6px;border-radius:3px;width:${Math.round(amt/sc.budget*100)}%;background:${COLORS[i]};"></div>
+      <div style="width:120px;font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:5px;">
+        <span style="width:8px;height:8px;border-radius:2px;background:${a.color};display:inline-block;"></span>${a.name.split(' ')[0]}
       </div>
-      <div style="width:90px;text-align:right;font-size:12px;font-weight:600;">Rp ${fmt(amt)}Jt</div>
+      <div style="flex:1;height:6px;background:var(--border);border-radius:3px;">
+        <div style="height:6px;border-radius:3px;width:${Math.round(a.amt/sc.budget*100)}%;background:${a.color};"></div>
+      </div>
+      <div style="width:90px;text-align:right;font-size:12px;font-weight:600;">Rp ${fmt(a.amt)}Jt</div>
     </div>`
   ).join('');
 }
 
 function renderScenarioChart() {
+  const sc = getScenarios();
+  const scored = computeScores(CHANNELS);
+  const prevTrx = scored.reduce((s,c)=>s+c.trx,0);
+  const prevRev = scored.reduce((s,c)=>s+c.revenue,0);
   dc('chartScenario');
-  charts['chartScenario'] = new Chart(document.getElementById('chartScenario'), {
-    type: 'bar',
-    data: {
-      labels: ['Budget (Rp Jt)', 'Transactions (K)', 'Revenue Index', 'ROAS (×10)', 'Trx Lift (%)'],
-      datasets: [
-        { label:'Conservative', data:[11250, Math.round(65200*1.04/1000), 106, 54, 4],  backgroundColor:'#1D9E7588', borderRadius:3 },
-        { label:'Balanced',     data:[14000, Math.round(65200*1.14/1000), 117, 51, 14], backgroundColor:'#378ADD88', borderRadius:3 },
-        { label:'Aggressive',   data:[15625, Math.round(65200*1.26/1000), 120, 45, 26], backgroundColor:'#D4537E88', borderRadius:3 },
+  charts['chartScenario'] = new Chart(document.getElementById('chartScenario'),{
+    type:'bar',
+    data:{
+      labels:['Budget (Rp Jt)','Transactions (K)','Revenue (Rp B)','ROAS (×10)','Trx Lift (%)'],
+      datasets:[
+        {label:'Conservative',data:[sc.conservative.budget,Math.round(prevTrx*(1+sc.conservative.trxLift)/1000),Math.round(prevRev*(1+sc.conservative.revLift)/1e9),Math.round(sc.conservative.roas*10),Math.round(sc.conservative.trxLift*100)],backgroundColor:'#1D9E7588',borderRadius:3},
+        {label:'Balanced',    data:[sc.balanced.budget,Math.round(prevTrx*(1+sc.balanced.trxLift)/1000),Math.round(prevRev*(1+sc.balanced.revLift)/1e9),Math.round(sc.balanced.roas*10),Math.round(sc.balanced.trxLift*100)],backgroundColor:'#378ADD88',borderRadius:3},
+        {label:'Aggressive',  data:[sc.aggressive.budget,Math.round(prevTrx*(1+sc.aggressive.trxLift)/1000),Math.round(prevRev*(1+sc.aggressive.revLift)/1e9),Math.round(sc.aggressive.roas*10),Math.round(sc.aggressive.trxLift*100)],backgroundColor:'#D4537E88',borderRadius:3},
       ]
     },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}} }
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}}
   });
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // ADSTOCK
-// ═══════════════════════════════════════════════════════════════
-let adstockChIdx = 0;
-
-function buildAdstockTabs() {
-  document.getElementById('adstock-tabs').innerHTML = CHANNELS.map((c, i) =>
+// ═══════════════════════════════════════════════════════════
+let adstockChIdx=0;
+function buildAdstockTabs(){
+  document.getElementById('adstock-tabs').innerHTML=CHANNELS.map((c,i)=>
     `<button class="ch-tab${i===0?' active':''}" onclick="selectAdstockCh(${i},this)">${c.name.split(' ')[0]}</button>`
   ).join('');
-}
-
-function selectAdstockCh(i, btn) {
-  adstockChIdx = i;
-  document.querySelectorAll('#adstock-tabs .ch-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('sl-decay').value = CHANNELS[i].decay;
-  document.getElementById('lbl-decay').textContent = CHANNELS[i].decay.toFixed(2);
+  adstockChIdx=0;
+  document.getElementById('sl-decay').value=CHANNELS[0].decay;
+  document.getElementById('lbl-decay').textContent=CHANNELS[0].decay.toFixed(2);
   updateAdstock();
 }
-
-function updateAdstock() {
-  const decay = parseFloat(document.getElementById('sl-decay').value);
-  const lag   = parseInt(document.getElementById('sl-lag').value);
-  document.getElementById('lbl-decay').textContent = decay.toFixed(2);
-  document.getElementById('lbl-lag').textContent   = lag + ' wks';
-
-  const ch = CHANNELS[adstockChIdx];
-  const weeks = 20;
-  const rawSpend = Array.from({ length: weeks }, (_, i) => {
-    if (i < 2 || i > 14) return ch.budget * 0.03;
-    const t = i - 2;
-    return ch.budget * (0.04 + 0.09 * Math.sin(t/2) * Math.sin(t/12) + 0.05 * Math.random());
+function selectAdstockCh(i,btn){
+  adstockChIdx=i;
+  document.querySelectorAll('#adstock-tabs .ch-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('sl-decay').value=CHANNELS[i].decay;
+  document.getElementById('lbl-decay').textContent=CHANNELS[i].decay.toFixed(2);
+  updateAdstock();
+}
+function updateAdstock(){
+  const decay=parseFloat(document.getElementById('sl-decay').value);
+  const lag=parseInt(document.getElementById('sl-lag').value);
+  document.getElementById('lbl-decay').textContent=decay.toFixed(2);
+  document.getElementById('lbl-lag').textContent=lag+' wks';
+  const ch=CHANNELS[adstockChIdx]||CHANNELS[0];
+  const weeks=20;
+  const rawSpend=Array.from({length:weeks},(_,i)=>{
+    if(i<2||i>14) return ch.budget*0.03;
+    const t=i-2;
+    return ch.budget*(0.04+0.09*Math.sin(t/2)*Math.sin(t/12)+0.05*(Math.sin(t*7.3)*0.5+0.5));
   });
-  const adstocked = adstockTransform(rawSpend, decay);
-  const wkLabels  = Array.from({ length: weeks }, (_, i) => `W${i+1}`);
-
+  const adstocked=adstockTransform(rawSpend,decay);
+  const wkLabels=Array.from({length:weeks},(_,i)=>`W${i+1}`);
+  const color=colorFor(adstockChIdx);
   dc('cAdstockSpend');
-  charts['cAdstockSpend'] = new Chart(document.getElementById('cAdstockSpend'), {
-    type: 'line',
-    data: { labels: wkLabels, datasets: [
-      { label:'Raw Spend',  data: rawSpend.map(v => Math.round(v)), borderColor:'#B4B2A9', backgroundColor:'transparent', tension:.3, pointRadius:2, borderDash:[4,3] },
-      { label:'Adstocked',  data: adstocked.map(v => Math.round(v)), borderColor: COLORS[adstockChIdx], backgroundColor: COLORS[adstockChIdx]+'22', tension:.3, fill:true, pointRadius:2 }
+  charts['cAdstockSpend']=new Chart(document.getElementById('cAdstockSpend'),{
+    type:'line',
+    data:{labels:wkLabels,datasets:[
+      {label:'Raw Spend',data:rawSpend.map(v=>Math.round(v)),borderColor:'#B4B2A9',backgroundColor:'transparent',tension:.3,pointRadius:2,borderDash:[4,3]},
+      {label:'Adstocked',data:adstocked.map(v=>Math.round(v)),borderColor:color,backgroundColor:color+'22',tension:.3,fill:true,pointRadius:2}
     ]},
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}} }
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}}
   });
-
-  const decayWeights = Array.from({ length: lag }, (_, i) => parseFloat(Math.pow(decay, i).toFixed(4)));
+  const dw=Array.from({length:lag},(_,i)=>parseFloat(Math.pow(decay,i).toFixed(4)));
   dc('cAdstockDecay');
-  charts['cAdstockDecay'] = new Chart(document.getElementById('cAdstockDecay'), {
-    type: 'bar',
-    data: { labels: decayWeights.map((_, i) => `Lag ${i}`), datasets: [{ label:'Weight', data: decayWeights, backgroundColor: COLORS[adstockChIdx]+'99', borderRadius: 3 }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{ticks:{font:{size:9},maxRotation:0}},y:{ticks:{font:{size:10}}}} }
+  charts['cAdstockDecay']=new Chart(document.getElementById('cAdstockDecay'),{
+    type:'bar',
+    data:{labels:dw.map((_,i)=>`Lag ${i}`),datasets:[{label:'Weight',data:dw,backgroundColor:color+'99',borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},maxRotation:0}},y:{ticks:{font:{size:10}}}}}
   });
-
-  const totalRaw  = rawSpend.reduce((a, b) => a + b, 0);
-  const totalAdst = adstocked.reduce((a, b) => a + b, 0);
-  const halfLife  = decay > 0 ? Math.log(0.5) / Math.log(decay) : Infinity;
-  document.getElementById('kpi-raw').textContent     = 'Rp ' + Math.round(totalRaw) + 'Jt';
-  document.getElementById('kpi-adst').textContent    = 'Rp ' + Math.round(totalAdst) + 'Jt';
-  document.getElementById('kpi-carry').textContent   = '+' + ((totalAdst/totalRaw - 1)*100).toFixed(1) + '%';
-  document.getElementById('kpi-halflife').textContent = isFinite(halfLife) ? halfLife.toFixed(1) + ' wks' : '∞';
-
-  document.getElementById('decay-recs').innerHTML = [
-    { name:'TV / OOH',         range:'0.7 – 0.9', note:'Long brand memory, weeks of carryover', cls:'badge-maintain' },
-    { name:'YouTube / Display', range:'0.5 – 0.7', note:'Visual brand, moderate carryover',      cls:'badge-optimize' },
-    { name:'Google / Meta Ads', range:'0.3 – 0.5', note:'Intent-driven, faster decay',           cls:'badge-scale' },
-    { name:'CRM / Push',        range:'0.1 – 0.2', note:'Immediate response, minimal carryover', cls:'badge-scale' },
-    { name:'Influencer/KOL',    range:'0.4 – 0.6', note:'Depends on content longevity',          cls:'badge-optimize' },
-  ].map(r => `
+  const totalRaw=rawSpend.reduce((a,b)=>a+b,0);
+  const totalAdst=adstocked.reduce((a,b)=>a+b,0);
+  const halfLife=decay>0?Math.log(0.5)/Math.log(decay):Infinity;
+  document.getElementById('kpi-raw').textContent='Rp '+Math.round(totalRaw)+'Jt';
+  document.getElementById('kpi-adst').textContent='Rp '+Math.round(totalAdst)+'Jt';
+  document.getElementById('kpi-carry').textContent='+'+safe((totalAdst/totalRaw-1)*100).toFixed(1)+'%';
+  document.getElementById('kpi-halflife').textContent=isFinite(halfLife)?halfLife.toFixed(1)+' wks':'∞';
+  document.getElementById('decay-recs').innerHTML=[
+    {name:'TV / OOH',range:'0.7–0.9',note:'Long brand memory, weeks of carryover',cls:'badge-maintain'},
+    {name:'YouTube / Display',range:'0.5–0.7',note:'Visual brand, moderate carryover',cls:'badge-optimize'},
+    {name:'Google / Meta Ads',range:'0.3–0.5',note:'Intent-driven, faster decay',cls:'badge-scale'},
+    {name:'CRM / Push',range:'0.1–0.2',note:'Immediate response, minimal carryover',cls:'badge-scale'},
+    {name:'Influencer/KOL',range:'0.4–0.6',note:'Tergantung longevity konten',cls:'badge-optimize'},
+  ].map(r=>`
     <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:0.5px solid var(--border);">
       <div style="width:160px;font-size:12px;font-weight:600;">${r.name}</div>
       <span class="badge ${r.cls}" style="min-width:90px;text-align:center;">λ = ${r.range}</span>
       <div style="font-size:12px;color:var(--text-secondary);">${r.note}</div>
-    </div>`
-  ).join('');
+    </div>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // SATURATION
-// ═══════════════════════════════════════════════════════════════
-let satChIdx = 0;
-
-function buildSatTabs() {
-  document.getElementById('sat-tabs').innerHTML = CHANNELS.map((c, i) =>
+// ═══════════════════════════════════════════════════════════
+let satChIdx=0;
+function buildSatTabs(){
+  document.getElementById('sat-tabs').innerHTML=CHANNELS.map((c,i)=>
     `<button class="ch-tab${i===0?' active':''}" onclick="selectSatCh(${i},this)">${c.name.split(' ')[0]}</button>`
   ).join('');
-}
-
-function selectSatCh(i, btn) {
-  satChIdx = i;
-  document.querySelectorAll('#sat-tabs .ch-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('sl-K').value     = CHANNELS[i].K;
-  document.getElementById('lbl-K').textContent     = CHANNELS[i].K;
-  document.getElementById('sl-alpha').value = CHANNELS[i].alpha;
-  document.getElementById('lbl-alpha').textContent = CHANNELS[i].alpha.toFixed(1);
-  document.getElementById('sl-curr').value  = CHANNELS[i].budget;
-  document.getElementById('lbl-curr').textContent  = CHANNELS[i].budget;
+  satChIdx=0;
+  document.getElementById('sl-K').value=CHANNELS[0].K;
+  document.getElementById('lbl-K').textContent=CHANNELS[0].K;
+  document.getElementById('sl-alpha').value=CHANNELS[0].alpha;
+  document.getElementById('lbl-alpha').textContent=CHANNELS[0].alpha.toFixed(1);
+  document.getElementById('sl-curr').value=CHANNELS[0].budget;
+  document.getElementById('lbl-curr').textContent=CHANNELS[0].budget;
   updateSat();
 }
-
-function updateSat() {
-  const alpha = parseFloat(document.getElementById('sl-alpha').value);
-  const K     = parseFloat(document.getElementById('sl-K').value);
-  const curr  = parseFloat(document.getElementById('sl-curr').value);
-  document.getElementById('lbl-alpha').textContent = alpha.toFixed(1);
-  document.getElementById('lbl-K').textContent     = K;
-  document.getElementById('lbl-curr').textContent  = curr;
-
-  const maxX = Math.max(K * 3, curr * 1.5);
-  const pts  = 60;
-  const xs   = Array.from({ length: pts }, (_, i) => Math.round(i * maxX / pts));
-  const ys   = xs.map(x => hill(x, K, alpha));
-  const margs = xs.map(x => marginalHill(x, K, alpha) * 100);
-  const currSat = hill(curr, K, alpha);
-  const margAtCurr = marginalHill(curr, K, alpha) * 100;
-
-  dc('cSatCurve');
-  charts['cSatCurve'] = new Chart(document.getElementById('cSatCurve'), {
-    type: 'line',
-    data: { labels: xs, datasets: [
-      { label:'Response', data: ys.map(v => parseFloat(v.toFixed(4))), borderColor: COLORS[satChIdx], backgroundColor: COLORS[satChIdx]+'22', tension:.4, fill:true, pointRadius:0 }
-    ]},
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{font:{size:10},maxTicksLimit:6,callback:v=>v?'Rp '+v+'Jt':''},title:{display:true,text:'Spend (Rp Jt)',font:{size:10}}},
-        y:{ticks:{font:{size:10},callback:v=>(v*100).toFixed(0)+'%'},title:{display:true,text:'Response Index',font:{size:10}}}
-      }
-    }
-  });
-
-  dc('cMarginal');
-  charts['cMarginal'] = new Chart(document.getElementById('cMarginal'), {
-    type: 'line',
-    data: { labels: xs, datasets: [{ label:'Marginal Return', data: margs.map(v => parseFloat(v.toFixed(4))), borderColor:'#BA7517', backgroundColor:'#BA751722', tension:.4, fill:true, pointRadius:0 }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{font:{size:10},maxTicksLimit:6,callback:v=>v?'Rp '+v+'Jt':''}},
-        y:{ticks:{font:{size:10}}}
-      }
-    }
-  });
-
-  const satPct = (currSat * 100).toFixed(1) + '%';
-  let status, statusColor;
-  if (currSat < 0.4)      { status = 'Under-invested';  statusColor = '#BA7517'; }
-  else if (currSat < 0.7) { status = 'Efficient zone';  statusColor = '#639922'; }
-  else if (currSat < 0.85){ status = 'Near saturation'; statusColor = '#E24B4A'; }
-  else                     { status = 'Over-saturated';  statusColor = '#A32D2D'; }
-
-  document.getElementById('sat-pct').textContent    = satPct;
-  document.getElementById('sat-status').innerHTML   = `<span style="color:${statusColor}">${status}</span>`;
-  document.getElementById('sat-opt').textContent    = 'Rp ' + Math.round(K) + 'Jt';
-  document.getElementById('sat-marg').textContent   = margAtCurr.toFixed(3) + ' idx/Jt';
-}
-
-// ═══════════════════════════════════════════════════════════════
-// COMBINED MMM
-// ═══════════════════════════════════════════════════════════════
-function renderCombined() {
-  const data = CHANNELS.map((c, i) => {
-    const satLevel    = hill(c.budget, c.K, c.alpha);
-    const adstockBoost = 1 + c.decay * 0.3;
-    const satHaircut  = satLevel > 0.75 ? 0.7 + (1 - satLevel) * 0.6 : 1.0;
-    const rawROAS     = c.revenue / (c.budget * 1e6);
-    const adjROAS     = rawROAS * adstockBoost * satHaircut;
-    const baselineRev = c.revenue * 0.35;
-    const incremRev   = c.revenue * 0.65 * satHaircut;
-    return { ...c, satLevel, adjROAS, baselineRev, incremRev };
-  });
-
-  dc('cCombined');
-  charts['cCombined'] = new Chart(document.getElementById('cCombined'), {
-    type: 'bar',
-    data: { labels: CHANNELS.map(c => c.name), datasets: [
-      { label:'Baseline Revenue', data: data.map(c => parseFloat((c.baselineRev/1e9).toFixed(1))), backgroundColor:'#B4B2A9', borderRadius:3 },
-      { label:'Incremental Revenue', data: data.map(c => parseFloat((c.incremRev/1e9).toFixed(1))), backgroundColor: COLORS, borderRadius:3 }
-    ]},
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{stacked:true,ticks:{font:{size:10},maxRotation:30}},y:{stacked:true,ticks:{font:{size:10},callback:v=>'Rp '+v+'B'}}} }
-  });
-
-  dc('cROASadj');
-  charts['cROASadj'] = new Chart(document.getElementById('cROASadj'), {
-    type: 'bar',
-    data: { labels: CHANNELS.map(c => c.name), datasets: [
-      { label:'Raw ROAS',        data: data.map(c => parseFloat((c.revenue/(c.budget*1e6)).toFixed(2))), backgroundColor:'#B4B2A988', borderRadius:3 },
-      { label:'MMM-Adjusted',    data: data.map(c => parseFloat(c.adjROAS.toFixed(2))), backgroundColor: COLORS, borderRadius:3 }
-    ]},
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top'}}, scales:{x:{ticks:{font:{size:10},maxRotation:30}},y:{ticks:{font:{size:10}}}} }
-  });
-
-  dc('cIncremental');
-  charts['cIncremental'] = new Chart(document.getElementById('cIncremental'), {
-    type: 'doughnut',
-    data: { labels: CHANNELS.map(c => c.name), datasets: [{ data: data.map(c => parseFloat((c.incremRev/1e9).toFixed(1))), backgroundColor: COLORS, borderWidth:2, borderColor:'#fff' }] },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10}}} }
-  });
-
-  document.getElementById('combined-insights').innerHTML = [
-    { type:'ins-scale',  text:`<strong>CRM Push & Google Ads</strong> have the highest MMM-adjusted ROAS after carryover boost and saturation correction. CRM is significantly under-saturated (${(hill(250,400,2.2)*100).toFixed(0)}% sat.) — increasing budget delivers near-linear returns.` },
-    { type:'ins-warn',   text:`<strong>YouTube & Influencer/KOL</strong> show meaningful adstock carryover (λ=0.60/0.45). Their true contribution extends 3–5 weeks beyond campaign end. Last-click attribution significantly undercounts their brand value.` },
-    { type:'ins-reduce', text:`<strong>OOH is over-saturated</strong> (${(hill(1400,800,1.2)*100).toFixed(0)}% sat.) — marginal returns are near-flat. Every additional Rp 100Jt generates minimal incremental response. Reallocate to digital channels below inflection point.` },
-    { type:'ins-info',   text:`<strong>Programmatic</strong> shows low adstock decay (λ=0.20) — effects don't carry — and moderate saturation. Its CPA remains high due to lack of intent signals. Shift budget toward Google Search which has a proven intent-to-conversion path.` },
-  ].map(i => `<div class="insight-item ${i.type}">${i.text}</div>`).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// MAIN NAV + INIT
-// ═══════════════════════════════════════════════════════════════
-function showMain(id, btn) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.main-nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
+function selectSatCh(i,btn){
+  satChIdx=i;
+  document.querySelectorAll('#sat-tabs .ch-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-
-  if (id === 'dashboard')  renderDashboard();
-  if (id === 'channels')   renderChannels();
-  if (id === 'optimizer')  renderOptimizer();
-  if (id === 'scenarios')  { selectScenario('conservative', document.querySelector('.s-tab')); renderScenarioChart(); }
-  if (id === 'adstock')    updateAdstock();
-  if (id === 'saturation') updateSat();
-  if (id === 'combined')   renderCombined();
+  document.getElementById('sl-K').value=CHANNELS[i].K;
+  document.getElementById('lbl-K').textContent=CHANNELS[i].K;
+  document.getElementById('sl-alpha').value=CHANNELS[i].alpha;
+  document.getElementById('lbl-alpha').textContent=CHANNELS[i].alpha.toFixed(1);
+  document.getElementById('sl-curr').value=CHANNELS[i].budget;
+  document.getElementById('lbl-curr').textContent=CHANNELS[i].budget;
+  updateSat();
+}
+function updateSat(){
+  const alpha=parseFloat(document.getElementById('sl-alpha').value);
+  const K=parseFloat(document.getElementById('sl-K').value);
+  const curr=parseFloat(document.getElementById('sl-curr').value);
+  document.getElementById('lbl-alpha').textContent=alpha.toFixed(1);
+  document.getElementById('lbl-K').textContent=K;
+  document.getElementById('lbl-curr').textContent=curr;
+  const maxX=Math.max(K*3,curr*1.5,500);
+  const pts=60;
+  const xs=Array.from({length:pts},(_,i)=>Math.round(i*maxX/pts));
+  const ys=xs.map(x=>hill(x,K,alpha));
+  const margs=xs.map(x=>marginalHill(x,K,alpha)*100);
+  const currSat=hill(curr,K,alpha);
+  const margAtCurr=marginalHill(curr,K,alpha)*100;
+  const color=colorFor(satChIdx);
+  dc('cSatCurve');
+  charts['cSatCurve']=new Chart(document.getElementById('cSatCurve'),{
+    type:'line',
+    data:{labels:xs,datasets:[{label:'Response',data:ys.map(v=>parseFloat(v.toFixed(4))),borderColor:color,backgroundColor:color+'22',tension:.4,fill:true,pointRadius:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+      x:{ticks:{font:{size:10},maxTicksLimit:6,callback:v=>v?'Rp '+v+'Jt':''},title:{display:true,text:'Spend (Rp Jt)',font:{size:10}}},
+      y:{ticks:{font:{size:10},callback:v=>(v*100).toFixed(0)+'%'},title:{display:true,text:'Response Index',font:{size:10}}}
+    }}
+  });
+  dc('cMarginal');
+  charts['cMarginal']=new Chart(document.getElementById('cMarginal'),{
+    type:'line',
+    data:{labels:xs,datasets:[{label:'Marginal Return',data:margs.map(v=>parseFloat(v.toFixed(4))),borderColor:'#BA7517',backgroundColor:'#BA751722',tension:.4,fill:true,pointRadius:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},maxTicksLimit:6,callback:v=>v?'Rp '+v+'Jt':''}},y:{ticks:{font:{size:10}}}}}
+  });
+  let status,statusColor;
+  if(currSat<0.4){status='Under-invested';statusColor='#BA7517';}
+  else if(currSat<0.7){status='Efficient zone';statusColor='#639922';}
+  else if(currSat<0.85){status='Near saturation';statusColor='#E24B4A';}
+  else{status='Over-saturated';statusColor='#A32D2D';}
+  document.getElementById('sat-pct').textContent=(currSat*100).toFixed(1)+'%';
+  document.getElementById('sat-status').innerHTML=`<span style="color:${statusColor}">${status}</span>`;
+  document.getElementById('sat-opt').textContent='Rp '+Math.round(K)+'Jt';
+  document.getElementById('sat-marg').textContent=safe(margAtCurr).toFixed(3)+' idx/Jt';
 }
 
-function applyInput() {
-  renderOptimizer();
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.main-nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-optimizer').classList.add('active');
-  document.querySelectorAll('.main-nav-btn')[2].classList.add('active');
+// ═══════════════════════════════════════════════════════════
+// COMBINED MMM
+// ═══════════════════════════════════════════════════════════
+function renderCombined(){
+  const data=CHANNELS.map((c,i)=>{
+    const satLevel=hill(c.budget,c.K,c.alpha);
+    const adstockBoost=1+c.decay*0.3;
+    const satHaircut=satLevel>0.75?0.7+(1-satLevel)*0.6:1.0;
+    const rawROAS=c.budget>0?c.revenue/(c.budget*1e6):0;
+    const adjROAS=rawROAS*adstockBoost*satHaircut;
+    const baselineRev=c.revenue*0.35;
+    const incremRev=c.revenue*0.65*satHaircut;
+    return {...c,satLevel,adjROAS,baselineRev,incremRev,color:colorFor(i)};
+  });
+  dc('cCombined');
+  charts['cCombined']=new Chart(document.getElementById('cCombined'),{
+    type:'bar',
+    data:{labels:data.map(c=>c.name),datasets:[
+      {label:'Baseline Revenue',data:data.map(c=>parseFloat((c.baselineRev/1e9).toFixed(1))),backgroundColor:'#B4B2A9',borderRadius:3},
+      {label:'Incremental Revenue',data:data.map(c=>parseFloat((c.incremRev/1e9).toFixed(1))),backgroundColor:data.map(c=>c.color),borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{stacked:true,ticks:{font:{size:10},maxRotation:30}},y:{stacked:true,ticks:{font:{size:10},callback:v=>'Rp '+v+'B'}}}}
+  });
+  dc('cROASadj');
+  charts['cROASadj']=new Chart(document.getElementById('cROASadj'),{
+    type:'bar',
+    data:{labels:data.map(c=>c.name),datasets:[
+      {label:'Raw ROAS',data:data.map(c=>parseFloat((c.budget>0?c.revenue/(c.budget*1e6):0).toFixed(2))),backgroundColor:'#B4B2A988',borderRadius:3},
+      {label:'MMM-Adjusted',data:data.map(c=>parseFloat(safe(c.adjROAS).toFixed(2))),backgroundColor:data.map(c=>c.color),borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{ticks:{font:{size:10},maxRotation:30}},y:{ticks:{font:{size:10}}}}}
+  });
+  dc('cIncremental');
+  charts['cIncremental']=new Chart(document.getElementById('cIncremental'),{
+    type:'doughnut',
+    data:{labels:data.map(c=>c.name),datasets:[{data:data.map(c=>parseFloat((c.incremRev/1e9).toFixed(1))),backgroundColor:data.map(c=>c.color),borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10}}}}
+  });
+  const overSat=data.filter(c=>c.satLevel>0.75).sort((a,b)=>b.satLevel-a.satLevel);
+  const underSat=data.filter(c=>c.satLevel<0.4).sort((a,b)=>a.satLevel-b.satLevel);
+  const highDecay=data.filter(c=>c.decay>=0.5).sort((a,b)=>b.decay-a.decay);
+  document.getElementById('combined-insights').innerHTML=[
+    underSat.length?{type:'ins-scale',text:`<strong>Under-saturated (high opportunity): ${underSat.map(c=>c.name).join(', ')}</strong> — saturation level ${underSat.map(c=>(c.satLevel*100).toFixed(0)+'%').join(', ')}. Incremental budget di channel ini akan menghasilkan return mendekati linear.`}:null,
+    highDecay.length?{type:'ins-warn',text:`<strong>High adstock carryover: ${highDecay.map(c=>c.name).join(', ')}</strong> (λ=${highDecay.map(c=>c.decay).join(', ')}). Nilai kontribusinya extends 3–6 minggu setelah campaign berakhir. Last-click attribution underhitung channel ini.`}:null,
+    overSat.length?{type:'ins-reduce',text:`<strong>Over-saturated: ${overSat.map(c=>c.name).join(', ')}</strong> — saturation ${overSat.map(c=>(c.satLevel*100).toFixed(0)+'%').join(', ')}. Marginal return mendekati nol. Realokasi budget ke channel yang masih di bawah titik infleksi.`}:null,
+    {type:'ins-info',text:`<strong>MMM-adjusted ROAS</strong> berbeda dari raw ROAS karena memperhitungkan (1) adstock boost untuk channel dengan carryover tinggi dan (2) saturation haircut untuk channel yang mendekati ceiling. Gunakan ini sebagai referensi alokasi budget yang lebih akurat.`},
+  ].filter(Boolean).map(i=>`<div class="insight-item ${i.type}">${i.text}</div>`).join('');
 }
 
-// Init
-buildAdstockTabs();
-buildSatTabs();
+// ═══════════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════════
+function exportData(){
+  const payload={ campaign:CI, channels:CHANNELS, exportedAt:new Date().toISOString() };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`mmm-data-${Date.now()}.json`; a.click();
+  showToast('Data exported!');
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAIN NAV
+// ═══════════════════════════════════════════════════════════
+function showMain(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.main-nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='dashboard')  renderDashboard();
+  if(id==='channels')   renderChannels();
+  if(id==='optimizer')  renderOptimizer();
+  if(id==='scenarios')  { selectScenario('conservative',document.querySelector('.s-tab')); renderScenarioChart(); }
+  if(id==='adstock')    { buildAdstockTabs(); }
+  if(id==='saturation') { buildSatTabs(); }
+  if(id==='combined')   renderCombined();
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+buildInputTable();
+document.getElementById('header-campaign-label').textContent = DEFAULT_CI.name + ' · ' + DEFAULT_CI.period;
 renderDashboard();
 </script>
 </body>
